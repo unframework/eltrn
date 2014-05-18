@@ -19,31 +19,45 @@ require([
     }
 
     var context = createAudioContext();
-    var soundSource, convolver;
+    var soundSource, convolver, filter;
 
     soundSource = context.createBufferSource();
-    soundSource.playbackRate.value = 0.5;
+    // soundSource.playbackRate.value = 0.5;
+    filter = context.createBiquadFilter();
     convolver = context.createConvolver();
 
-    soundSource.connect(convolver);
-    convolver.connect(context.destination);
+    soundSource.loop = true;
+    soundSource.loopEnd = 0.5;
+
+    filter.type = 0; // low-pass
+    filter.Q.value = 12.5;
+
+    filter.frequency.setValueAtTime(440,  context.currentTime);
+    filter.frequency.linearRampToValueAtTime(1760,  context.currentTime + 8);
+    filter.Q.setValueAtTime(15, context.currentTime);
+    // filter.Q.linearRampToValueAtTime(5, 8);
+
+    soundSource.connect(filter);
+    filter.connect(context.destination);
+    // filter.connect(convolver);
+    // convolver.connect(context.destination);
 
     loadAudio(context, './echo-chamber.wav').then(function (buffer) {
-        convolver.buffer = buffer;
+        // convolver.buffer = buffer;
     });
 
-    loadAudio(context, 'http://upload.wikimedia.org/wikipedia/en/0/04/Rayman_2_music_sample.ogg').then(function (buffer) {
+    loadAudio(context, './kick.mp3').then(function (buffer) {
         soundSource.buffer = buffer;
     });
 
     function playSound() {
         // play the source now
-        soundSource.start(context.currentTime);
+        soundSource.start(0);
     }
 
     function stopSound() {
         // stop the source now
-        soundSource.stop(context.currentTime);
+        soundSource.stop(0);
     }
 
     // Events for the play/stop bottons
