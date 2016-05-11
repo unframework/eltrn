@@ -25,7 +25,11 @@ class UI
               display: 'inline-block'
               width: '32px'
               height: '32px'
-              background: if @_selections[coord] then '#486' else if isActiveStep then '#888' else '#aaa'
+              background: if @_selections[coord]
+                '#486'
+              else if isActiveStep
+                '#888'
+              else (if (Math.floor(col / 4) + Math.floor(row / 4)) % 2 then '#aaa' else '#bbb')
             }
             onclick: =>
               @_selections[coord] = !@_selections[coord]
