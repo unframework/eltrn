@@ -50,15 +50,13 @@ runSequence = ->
   addStep startTime, startTime + 0.5
   addStep startTime + 1, startTime + 1.5
 
-# play/stop buttons
-document.body.innerHTML = '<button id="play">Play</button>'
-document.querySelector('#play').addEventListener 'click', ->
-  runSequence()
-
 vdomLive (renderLive) ->
   ui = new UI()
 
   liveDOM = renderLive (h) ->
-    ui.render(h)
+    h 'div', [
+      h 'button', { onclick: -> runSequence() }, 'Play'
+      ui.render(h)
+    ]
 
   document.body.appendChild liveDOM
