@@ -47,12 +47,11 @@ addStep = (startTime, sliceStartTime, sliceLength) ->
   soundSource.connect context.destination
 
 runSequence = (startTime, stepList) ->
-  stepLength = TOTAL_LENGTH / STEP_COUNT
-
-  for [ stepCol, stepRow ] in stepList
+  for [ stepCol, stepRow, stepCount ] in stepList
     stepStartTime = stepCol * TOTAL_LENGTH
     sliceStartTime = stepRow * TOTAL_LENGTH
-    addStep startTime + stepStartTime, sliceStartTime, stepLength
+    sliceLength = stepCount * TOTAL_LENGTH / STEP_COUNT
+    addStep startTime + stepStartTime, sliceStartTime, sliceLength
 
 vdomLive (renderLive) ->
   ui = new UI(STEP_COUNT)
