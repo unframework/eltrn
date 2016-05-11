@@ -46,8 +46,7 @@ addStep = (startTime, sliceStartTime, sliceLength) ->
   soundSource.start startTime, sliceStartTime, sliceLength
   soundSource.connect context.destination
 
-runSequence = (stepList) ->
-  startTime = context.currentTime
+runSequence = (startTime, stepList) ->
   stepLength = TOTAL_LENGTH / STEP_COUNT
 
   for [ stepCol, stepRow ] in stepList
@@ -56,11 +55,21 @@ runSequence = (stepList) ->
 
 vdomLive (renderLive) ->
   ui = new UI(STEP_COUNT)
+  nextLoopStartTime = null
+
+  setInterval ->
+    if nextLoopStartTime isnt null and context.currentTime > nextLoopStartTime - 0.2
+      runSequence nextLoopStartTime, ui.getSteps()
+      nextLoopStartTime += TOTAL_LENGTH
+  , 10
 
   liveDOM = renderLive (h) ->
     h 'div', [
       h 'button', { onclick: -> addStep(0, 0, TOTAL_LENGTH) }, 'Play Full Sample'
-      h 'button', { onclick: -> runSequence(ui.getSteps()) }, 'Play'
+      if nextLoopStartTime isnt null
+        h 'button', { onclick: -> nextLoopStartTime = null }, 'Stop'
+      else
+        h 'button', { onclick: -> nextLoopStartTime = context.currentTime + 0.1 }, 'Play'
       ui.render(h)
     ]
 
