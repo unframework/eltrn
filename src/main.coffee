@@ -5,6 +5,7 @@ convertBuffer = require('buffer-to-arraybuffer')
 UI = require('./UI.coffee')
 
 STEP_COUNT = 16
+TOTAL_LENGTH = 4
 
 soundData = fs.readFileSync __dirname + '/../sample.mp3'
 convolverSoundData = fs.readFileSync __dirname + '/../echo-chamber.wav'
@@ -39,25 +40,27 @@ context.decodeAudioData convertBuffer(soundData), (buffer) ->
 # filter.connect(convolver)
 # convolver.connect(context.destination)
 
-addStep = (startTime, endTime) ->
+addStep = (startTime, sliceStartTime, sliceLength) ->
   soundSource = context.createBufferSource()
   soundSource.buffer = soundBuffer
-  soundSource.start startTime
-  soundSource.stop endTime
+  soundSource.start startTime, sliceStartTime, sliceLength
   soundSource.connect context.destination
 
-runSequence = ->
+runSequence = (stepList) ->
   startTime = context.currentTime
+  stepLength = TOTAL_LENGTH / STEP_COUNT
 
-  addStep startTime, startTime + 0.5
-  addStep startTime + 1, startTime + 1.5
+  for [ stepCol, stepRow ] in stepList
+    stepStartTime = stepCol * TOTAL_LENGTH
+    addStep startTime + stepStartTime, stepStartTime, stepLength
 
 vdomLive (renderLive) ->
   ui = new UI(STEP_COUNT)
 
   liveDOM = renderLive (h) ->
     h 'div', [
-      h 'button', { onclick: -> runSequence() }, 'Play'
+      h 'button', { onclick: -> addStep(0, 0, TOTAL_LENGTH) }, 'Play Full Sample'
+      h 'button', { onclick: -> runSequence(ui.getSteps()) }, 'Play'
       ui.render(h)
     ]
 
