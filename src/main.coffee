@@ -4,8 +4,6 @@ convertBuffer = require('buffer-to-arraybuffer')
 soundData = fs.readFileSync __dirname + '/../sample.mp3'
 convolverSoundData = fs.readFileSync __dirname + '/../echo-chamber.wav'
 
-console.log soundData.length
-
 createAudioContext = ->
   if typeof window.AudioContext isnt 'undefined'
     return new window.AudioContext
@@ -20,7 +18,7 @@ soundSource = context.createBufferSource()
 context.decodeAudioData convertBuffer(soundData), (buffer) ->
   soundSource.buffer = buffer
 soundSource.loop = true
-soundSource.loopEnd = 0.5
+# soundSource.loopEnd = 1.5
 # soundSource.playbackRate.value = 0.5
 
 convolver = context.createConvolver()
@@ -29,7 +27,7 @@ convolver = context.createConvolver()
 
 # low-pass
 filter = context.createBiquadFilter()
-filter.type = 0
+filter.type = 'lowpass'
 filter.Q.value = 12.5
 filter.frequency.setValueAtTime 440, context.currentTime
 filter.frequency.linearRampToValueAtTime 1760, context.currentTime + 8
