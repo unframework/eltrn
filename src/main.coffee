@@ -4,6 +4,8 @@ convertBuffer = require('buffer-to-arraybuffer')
 
 UI = require('./UI.coffee')
 
+STEP_COUNT = 16
+
 soundData = fs.readFileSync __dirname + '/../sample.mp3'
 convolverSoundData = fs.readFileSync __dirname + '/../echo-chamber.wav'
 
@@ -51,7 +53,7 @@ runSequence = ->
   addStep startTime + 1, startTime + 1.5
 
 vdomLive (renderLive) ->
-  ui = new UI()
+  ui = new UI(STEP_COUNT)
 
   liveDOM = renderLive (h) ->
     h 'div', [

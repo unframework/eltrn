@@ -1,13 +1,11 @@
-STEP_COUNT = 16
-
 class UI
-  constructor: ->
+  constructor: (@_stepCount) ->
     @_selections = Object.create null
     @_selections['3x4'] = true
 
   render: (h) ->
-    h 'div', (for row in [0 ... STEP_COUNT]
-      h 'div', (for col in [0 ... STEP_COUNT]
+    h 'div', (for row in [0 ... @_stepCount]
+      h 'div', (for col in [0 ... @_stepCount]
         do =>
           coord = "#{col}x#{row}"
 
