@@ -17,37 +17,43 @@ createAudioContext = ->
 
 context = createAudioContext()
 
-soundSource = context.createBufferSource()
+soundBuffer = null
 context.decodeAudioData convertBuffer(soundData), (buffer) ->
-  soundSource.buffer = buffer
-soundSource.loop = true
-# soundSource.loopEnd = 1.5
-# soundSource.playbackRate.value = 0.5
+  soundBuffer = buffer
 
-convolver = context.createConvolver()
+# convolver = context.createConvolver()
 # context.decodeAudioData convertBuffer(soundData), (buffer) ->
 #   convolver.buffer = buffer
 
 # low-pass
-filter = context.createBiquadFilter()
-filter.type = 'lowpass'
-filter.Q.value = 12.5
-filter.frequency.setValueAtTime 440, context.currentTime
-filter.frequency.linearRampToValueAtTime 1760, context.currentTime + 8
-filter.Q.setValueAtTime 15, context.currentTime
+# filter = context.createBiquadFilter()
+# filter.type = 'lowpass'
+# filter.Q.value = 12.5
+# filter.frequency.setValueAtTime 440, context.currentTime
+# filter.frequency.linearRampToValueAtTime 1760, context.currentTime + 8
+# filter.Q.setValueAtTime 15, context.currentTime
 # filter.Q.linearRampToValueAtTime(5, 8)
 
-soundSource.connect filter
-filter.connect context.destination
 # filter.connect(convolver)
 # convolver.connect(context.destination)
 
+addStep = (startTime, endTime) ->
+  soundSource = context.createBufferSource()
+  soundSource.buffer = soundBuffer
+  soundSource.start startTime
+  soundSource.stop endTime
+  soundSource.connect context.destination
+
+runSequence = ->
+  startTime = context.currentTime
+
+  addStep startTime, startTime + 0.5
+  addStep startTime + 1, startTime + 1.5
+
 # play/stop buttons
-document.body.innerHTML = '<button id="play">Play</button><button id="stop">Stop</button>'
+document.body.innerHTML = '<button id="play">Play</button>'
 document.querySelector('#play').addEventListener 'click', ->
-  soundSource.start 0
-document.querySelector('#stop').addEventListener 'click', ->
-  soundSource.stop 0
+  runSequence()
 
 vdomLive (renderLive) ->
   ui = new UI()
