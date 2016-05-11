@@ -2,7 +2,9 @@ class UI
   constructor: (@_stepCount) ->
     @_activeStep = -1
     @_selections = Object.create null
-    @_selections['3x4'] = true
+
+    for i in [0 ... @_stepCount]
+      @_selections["#{i}x#{i}"] = true
 
   getSteps: ->
     for coord, value of @_selections when value
