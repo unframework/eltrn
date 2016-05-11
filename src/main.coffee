@@ -1,5 +1,8 @@
 fs = require('fs')
+vdomLive = require('vdom-live')
 convertBuffer = require('buffer-to-arraybuffer')
+
+UI = require('./UI.coffee')
 
 soundData = fs.readFileSync __dirname + '/../sample.mp3'
 convolverSoundData = fs.readFileSync __dirname + '/../echo-chamber.wav'
@@ -45,3 +48,11 @@ document.querySelector('#play').addEventListener 'click', ->
   soundSource.start 0
 document.querySelector('#stop').addEventListener 'click', ->
   soundSource.stop 0
+
+vdomLive (renderLive) ->
+  ui = new UI()
+
+  liveDOM = renderLive (h) ->
+    ui.render(h)
+
+  document.body.appendChild liveDOM
