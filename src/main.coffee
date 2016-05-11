@@ -59,7 +59,18 @@ vdomLive (renderLive) ->
   nextLoopStartTime = null
 
   setInterval ->
-    if nextLoopStartTime isnt null and context.currentTime > nextLoopStartTime - 0.2
+    if nextLoopStartTime is null
+      return
+
+    currentTime = context.currentTime
+    remainder = nextLoopStartTime - currentTime
+
+    # avoid starting in the past
+    if remainder < 0
+      nextLoopStartTime = currentTime
+      remainder = 0
+
+    if remainder < 0.2
       runSequence nextLoopStartTime, ui.getSteps()
       nextLoopStartTime += TOTAL_LENGTH
   , 10
@@ -70,7 +81,7 @@ vdomLive (renderLive) ->
       if nextLoopStartTime isnt null
         h 'button', { onclick: -> nextLoopStartTime = null }, 'Stop'
       else
-        h 'button', { onclick: -> nextLoopStartTime = context.currentTime + 0.1 }, 'Play'
+        h 'button', { onclick: -> nextLoopStartTime = context.currentTime }, 'Play'
       ui.render(h)
     ]
 
