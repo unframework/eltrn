@@ -56,29 +56,41 @@ runSequence = (startTime, stepList) ->
 
 vdomLive (renderLive) ->
   ui = new UI(STEP_COUNT)
+  currentLoopStartTime = null
   nextLoopStartTime = null
 
   setInterval ->
-    if nextLoopStartTime is null
-      ui.setActiveStep null
-      return
-
     currentTime = context.currentTime
-    remainder = nextLoopStartTime - currentTime
 
-    # avoid starting in the past
-    if remainder < 0
-      nextLoopStartTime = currentTime
-      remainder = 0
+    # schedule next loop
+    if nextLoopStartTime isnt null and nextLoopStartTime < currentTime + 0.2
+      # avoid starting in the past
+      if nextLoopStartTime < currentTime
+        nextLoopStartTime = currentTime
 
-    if remainder < 0.2
+      # start current loop display
+      if currentLoopStartTime is null
+        currentLoopStartTime = nextLoopStartTime
+
       runSequence nextLoopStartTime, ui.getSteps()
       nextLoopStartTime += TOTAL_LENGTH
 
-    activeLoopTime = (if remainder > TOTAL_LENGTH then TOTAL_LENGTH + TOTAL_LENGTH else TOTAL_LENGTH) - remainder
-    activeStepIndex = Math.floor(STEP_COUNT * activeLoopTime / TOTAL_LENGTH)
+    # advance current loop when done
+    if currentLoopStartTime isnt null and currentTime > currentLoopStartTime + TOTAL_LENGTH
+      if nextLoopStartTime isnt null
+        currentLoopStartTime += TOTAL_LENGTH
+      else
+        currentLoopStartTime = null
 
-    ui.setActiveStep activeStepIndex
+    # display current loop if active
+    if currentLoopStartTime isnt null
+      activeLoopTime = currentTime - currentLoopStartTime
+      activeStepIndex = Math.floor(STEP_COUNT * activeLoopTime / TOTAL_LENGTH)
+
+      ui.setActiveStep activeStepIndex
+    else
+      ui.setActiveStep null
+
   , 10
 
   document.body.style.textAlign = 'center';
@@ -90,7 +102,7 @@ vdomLive (renderLive) ->
       }
     }, [
       if nextLoopStartTime isnt null
-        h 'button', { style: { fontSize: '24px' }, onclick: -> nextLoopStartTime = null }, 'Stop'
+        h 'button', { style: { fontSize: '24px' }, onclick: -> currentLoopStartTime = null; nextLoopStartTime = null }, 'Stop'
       else
         h 'button', { style: { fontSize: '24px' }, onclick: -> nextLoopStartTime = context.currentTime }, 'Play'
       ' '
