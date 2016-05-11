@@ -60,6 +60,7 @@ vdomLive (renderLive) ->
 
   setInterval ->
     if nextLoopStartTime is null
+      ui.setActiveStep null
       return
 
     currentTime = context.currentTime
@@ -73,6 +74,11 @@ vdomLive (renderLive) ->
     if remainder < 0.2
       runSequence nextLoopStartTime, ui.getSteps()
       nextLoopStartTime += TOTAL_LENGTH
+
+    activeLoopTime = (if remainder > TOTAL_LENGTH then TOTAL_LENGTH + TOTAL_LENGTH else TOTAL_LENGTH) - remainder
+    activeStepIndex = Math.floor(STEP_COUNT * activeLoopTime / TOTAL_LENGTH)
+
+    ui.setActiveStep activeStepIndex
   , 10
 
   liveDOM = renderLive (h) ->
