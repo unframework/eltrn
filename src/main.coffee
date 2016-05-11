@@ -81,13 +81,21 @@ vdomLive (renderLive) ->
     ui.setActiveStep activeStepIndex
   , 10
 
+  document.body.style.textAlign = 'center';
   liveDOM = renderLive (h) ->
-    h 'div', [
-      h 'button', { onclick: -> addStep(0, 0, TOTAL_LENGTH) }, 'Play Full Sample'
+    h 'div', {
+      style: {
+        display: 'inline-block'
+        marginTop: '50px'
+      }
+    }, [
       if nextLoopStartTime isnt null
-        h 'button', { onclick: -> nextLoopStartTime = null }, 'Stop'
+        h 'button', { style: { fontSize: '24px' }, onclick: -> nextLoopStartTime = null }, 'Stop'
       else
-        h 'button', { onclick: -> nextLoopStartTime = context.currentTime }, 'Play'
+        h 'button', { style: { fontSize: '24px' }, onclick: -> nextLoopStartTime = context.currentTime }, 'Play'
+      ' '
+      h 'button', { onclick: -> addStep(0, 0, TOTAL_LENGTH) }, 'Play Full Sample'
+      h 'div', { style: { height: '20px' } }
       ui.render(h)
     ]
 
