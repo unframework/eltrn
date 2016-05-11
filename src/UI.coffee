@@ -4,7 +4,7 @@ class UI
     @_selections['3x4'] = true
 
   getSteps: ->
-    for coord in Object.keys @_selections
+    for coord, value of @_selections when value
       [col, row] = coord.split 'x'
       [ parseInt(col, 10) / @_stepCount, parseInt(row, 10) / @_stepCount ]
 
