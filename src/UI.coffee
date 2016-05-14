@@ -23,6 +23,7 @@ class GLWidget
 
   update: () ->
     @_onUpdate()
+    undefined
 
 class UI
   constructor: (@_stepCount) ->
