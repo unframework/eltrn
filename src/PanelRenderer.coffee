@@ -22,9 +22,9 @@ module.exports = class PanelRenderer
     @_modelPosition = vec3.create()
     @_modelMatrix = mat4.create()
 
-    @_panelColor = vec4.fromValues(0, 0, 0, 1)
+    @_panelColor = vec4.fromValues(0.8, 0.8, 0.8, 1)
 
-  draw: (cameraMatrix) ->
+  draw: (cameraMatrix, stepCount) ->
     # general setup
     @_flatShader.bind()
 
@@ -34,10 +34,19 @@ module.exports = class PanelRenderer
     @_gl.vertexAttribPointer @_flatShader.positionLocation, 2, @_gl.FLOAT, false, 0, 0
 
     # body
-    mat4.identity(@_modelMatrix)
-    mat4.translate(@_modelMatrix, @_modelMatrix, @_modelPosition)
-
     @_gl.uniform4fv @_flatShader.colorLocation, @_panelColor
-    @_gl.uniformMatrix4fv @_flatShader.modelLocation, false, @_modelMatrix
 
-    @_gl.drawArrays @_gl.TRIANGLES, 0, 2 * 3
+    rowPos = vec3.fromValues(0, 0, 0)
+    cellScale = vec3.fromValues(0.9, 0.9, 0.9)
+
+    for row in [0 ... stepCount]
+      for col in [0 ... stepCount]
+        rowPos[0] = col - (stepCount - 1) * 0.5
+        rowPos[1] = row - (stepCount - 1) * 0.5
+
+        mat4.identity(@_modelMatrix)
+        mat4.translate(@_modelMatrix, @_modelMatrix, rowPos)
+        mat4.scale(@_modelMatrix, @_modelMatrix, cellScale)
+
+        @_gl.uniformMatrix4fv @_flatShader.modelLocation, false, @_modelMatrix
+        @_gl.drawArrays @_gl.TRIANGLES, 0, 2 * 3

@@ -30,8 +30,10 @@ class UI
     @_activeStep = -1
     @_selections = Object.create null
 
+    @_cameraOffset = vec3.create()
+    vec3.set @_cameraOffset, 0, 0, -20
     @_cameraPosition = vec3.create()
-    vec3.set @_cameraPosition, 0, 0, -8
+    vec3.set @_cameraPosition, 0, 0, 2
 
     @_panelRenderer = null
 
@@ -78,10 +80,11 @@ class UI
       @_panelRenderer = new PanelRenderer(gl)
     , () =>
       cameraTransform = mat4.create()
-      mat4.perspective cameraTransform, 45, w / h, 1, 20
+      mat4.perspective cameraTransform, 45, w / h, 1, 100
+      mat4.translate cameraTransform, cameraTransform, @_cameraOffset
       mat4.rotateX cameraTransform, cameraTransform, -0.3
       mat4.translate cameraTransform, cameraTransform, @_cameraPosition
 
-      @_panelRenderer.draw(cameraTransform)
+      @_panelRenderer.draw(cameraTransform, @_stepCount)
 
 module.exports = UI
