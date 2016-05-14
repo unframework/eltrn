@@ -1,3 +1,24 @@
+
+createCanvas = (w, h) ->
+  viewCanvas = document.createElement('canvas')
+  viewCanvas.width = w or window.innerWidth
+  viewCanvas.height = h or window.innerHeight
+
+  viewCanvas
+
+class GLWidget
+  constructor: (@_w, @_h, @_onInit, @_onUpdate) ->
+
+  type: 'Widget'
+  init: () ->
+    canvas = createCanvas @_w, @_h
+    @_onInit canvas.getContext('experimental-webgl')
+
+    canvas
+
+  update: () ->
+    @_onUpdate()
+
 class UI
   constructor: (@_stepCount) ->
     @_activeStep = -1
@@ -38,28 +59,8 @@ class UI
     @_activeStep = index
 
   render: (h) ->
-    h 'div', (for row in [0 ... @_stepCount]
-      h 'div', (for col in [0 ... @_stepCount]
-        isActiveStep = @_activeStep is col
-
-        do =>
-          coord = "#{col}x#{row}"
-
-          h 'button', {
-            style: {
-              display: 'inline-block'
-              width: '32px'
-              height: '32px'
-              background: if @_selections[coord]
-                '#486'
-              else if isActiveStep
-                '#888'
-              else (if (Math.floor(col / 4) + Math.floor(row / 4)) % 2 then '#aaa' else '#bbb')
-            }
-            onclick: =>
-              @_selections[coord] = !@_selections[coord]
-          }
-      )
-    )
+    new GLWidget 32 * 16, 32 * 16, (gl) =>
+      console.log 'GL init!'
+    , () =>
 
 module.exports = UI
