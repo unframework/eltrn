@@ -23,6 +23,7 @@
     "brfs": "^1.4.3",
     "buffer-to-arraybuffer": "0.0.4",
     "coffeeify": "^2.0.1",
+    "gl-matrix": "^2.3.2",
     "vdom-live": "^1.1.4"
   }
 }
