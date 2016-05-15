@@ -47,22 +47,25 @@ class Panel
 
     [ cellCol, cellRow ]
 
-  startLine: (plane, planeGesture) ->
-    [ cellCol, cellRow ] = @_convertPlane(plane)
+  _cellIsInBounds: (cell) ->
+    cell[0] >= 0 and cell[0] < @_stepCount and cell[1] >= 0 and cell[1] < @_stepCount
 
-    if cellCol >= 0 and cellCol < @_stepCount and cellRow >= 0 and cellRow < @_stepCount
-      @toggleCell cellCol, cellRow
+  startLine: (plane, planeGesture) ->
+    cell = @_convertPlane(plane)
+
+    if @_cellIsInBounds cell
+      @toggleCell cell[0], cell[1]
 
       planeGesture.on 'move', (movePlane) =>
-        [ moveCellCol, moveCellRow ] = @_convertPlane(movePlane)
+        moveCell = @_convertPlane(movePlane)
 
         # first, debounce
-        if moveCellCol isnt cellCol or moveCellRow isnt cellRow
-          cellCol = moveCellCol
-          cellRow = moveCellRow
+        if moveCell[0] isnt cell[0] or moveCell[1] isnt cell[1]
+          cell[0] = moveCell[0]
+          cell[1] = moveCell[1]
 
-          if moveCellCol >= 0 and moveCellCol < @_stepCount and moveCellRow >= 0 and moveCellRow < @_stepCount
-            @toggleCell moveCellCol, moveCellRow
+          if moveCell[0] >= 0 and moveCell[0] < @_stepCount and moveCell[1] >= 0 and moveCell[1] < @_stepCount
+            @toggleCell moveCell[0], moveCell[1]
 
   toggleCell: (col, row) ->
     coord = "#{col}x#{row}"
