@@ -4,10 +4,12 @@ vec4 = require('gl-matrix').vec4
 mat4 = require('gl-matrix').mat4
 
 FlatShader = require('./FlatShader.coffee')
+PathRenderer = require('./PathRenderer.coffee')
 
 module.exports = class PanelRenderer
   constructor: (@_gl) ->
     @_flatShader = new FlatShader @_gl
+    @_pathRenderer = new PathRenderer @_gl
 
     @_meshBuffer = @_gl.createBuffer()
     @_gl.bindBuffer @_gl.ARRAY_BUFFER, @_meshBuffer
@@ -60,6 +62,12 @@ module.exports = class PanelRenderer
 
         @_gl.uniformMatrix4fv @_flatShader.modelLocation, false, @_modelMatrix
         @_gl.drawArrays @_gl.TRIANGLES, 0, 2 * 3
+
+    # draft line
+    if panel._draftLine
+      @_pathRenderer.draw cameraMatrix, (addNode) =>
+        addNode panel._draftLine[0][0] - panel._stepCount * 0.5, panel._draftLine[0][1] - panel._stepCount * 0.5
+        addNode panel._draftLine[1][0] - panel._stepCount * 0.5, panel._draftLine[1][1] - panel._stepCount * 0.5
 
   _convertRay: ([ rayStart, rayEnd ]) ->
     normal = vec3.fromValues(0, 0, 1)

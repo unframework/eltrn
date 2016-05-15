@@ -6,6 +6,8 @@ class Panel
     for i in [0 ... @_stepCount]
       @_selections["#{i}x#{i}"] = true
 
+    @_draftLine = null
+
   getSteps: ->
     continuations = Object.create null
 
@@ -56,16 +58,16 @@ class Panel
     if @_cellIsInBounds cell
       @toggleCell cell[0], cell[1]
 
+      @_draftLine = [ cell, cell ]
+
       planeGesture.on 'move', (movePlane) =>
         moveCell = @_convertPlane(movePlane)
 
-        # first, debounce
-        if moveCell[0] isnt cell[0] or moveCell[1] isnt cell[1]
-          cell[0] = moveCell[0]
-          cell[1] = moveCell[1]
+        if @_cellIsInBounds moveCell
+          @_draftLine[1] = moveCell
 
-          if moveCell[0] >= 0 and moveCell[0] < @_stepCount and moveCell[1] >= 0 and moveCell[1] < @_stepCount
-            @toggleCell moveCell[0], moveCell[1]
+      planeGesture.on 'end', =>
+        @_draftLine = null
 
   toggleCell: (col, row) ->
     coord = "#{col}x#{row}"
