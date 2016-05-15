@@ -41,11 +41,28 @@ class Panel
   setActiveStep: (index) ->
     @_activeStep = index
 
-  startLine: (startPos) ->
-    [ cellCol, cellRow ] = startPos
+  _convertPlane: (plane) ->
+    cellCol = Math.floor(plane[0] + @_stepCount * 0.5)
+    cellRow = Math.floor(plane[1] + @_stepCount * 0.5)
+
+    [ cellCol, cellRow ]
+
+  startLine: (plane, planeGesture) ->
+    [ cellCol, cellRow ] = @_convertPlane(plane)
 
     if cellCol >= 0 and cellCol < @_stepCount and cellRow >= 0 and cellRow < @_stepCount
       @toggleCell cellCol, cellRow
+
+      planeGesture.on 'move', (movePlane) =>
+        [ moveCellCol, moveCellRow ] = @_convertPlane(movePlane)
+
+        # first, debounce
+        if moveCellCol isnt cellCol or moveCellRow isnt cellRow
+          cellCol = moveCellCol
+          cellRow = moveCellRow
+
+          if moveCellCol >= 0 and moveCellCol < @_stepCount and moveCellRow >= 0 and moveCellRow < @_stepCount
+            @toggleCell moveCellCol, moveCellRow
 
   toggleCell: (col, row) ->
     coord = "#{col}x#{row}"
