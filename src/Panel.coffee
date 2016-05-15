@@ -38,8 +38,8 @@ class Panel
     if @_draftLine[0][0] >= @_draftLine[1][0]
       return
 
-    # non-positive source length check (reversing playback is not yet convenient)
-    if @_draftLine[0][1] >= @_draftLine[1][1]
+    # zero source length check
+    if @_draftLine[0][1] is @_draftLine[1][1]
       return
 
     # start overlap check

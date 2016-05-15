@@ -20,9 +20,22 @@ createAudioContext = ->
 
 context = createAudioContext()
 
-soundBuffer = null
+fwdSoundBuffer = null
+revSoundBuffer = null
 context.decodeAudioData convertBuffer(soundData), (buffer) ->
-  soundBuffer = buffer
+  fwdSoundBuffer = buffer
+
+  revSoundBuffer = context.createBuffer(
+    buffer.numberOfChannels,
+    buffer.length,
+    buffer.sampleRate
+  )
+
+  for channelIndex in [ 0 ... buffer.numberOfChannels ]
+    channelValues = new Float32Array(fwdSoundBuffer.getChannelData(channelIndex))
+    Array.prototype.reverse.call channelValues
+
+    revSoundBuffer.getChannelData(channelIndex).set channelValues
 
 # low-pass
 filter = context.createBiquadFilter()
@@ -36,9 +49,9 @@ filter.connect(context.destination)
 
 addStep = (startTime, sliceStartTime, sliceLength, sliceSourceLength) ->
   soundSource = context.createBufferSource()
-  soundSource.buffer = soundBuffer
-  soundSource.start startTime, TOTAL_LENGTH + sliceStartTime, sliceSourceLength
-  soundSource.playbackRate.value = sliceSourceLength / sliceLength
+  soundSource.buffer = if sliceSourceLength > 0 then fwdSoundBuffer else revSoundBuffer
+  soundSource.start startTime, TOTAL_LENGTH + sliceStartTime, Math.abs(sliceSourceLength)
+  soundSource.playbackRate.value = Math.abs(sliceSourceLength / sliceLength)
   soundSource.connect filter
 
 runSequence = (startTime, stepList) ->
