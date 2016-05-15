@@ -53,6 +53,11 @@ class Panel
     cell = @_convertPlane(plane)
 
     if cell[0] >= 0 and cell[0] <= @_stepCount and cell[1] >= 0 and cell[1] <= @_stepCount
+      # remove previous line
+      existingLineIndexList = (lineIndex for line, lineIndex in @_lines when cell[0] is line[0][0] and cell[1] is line[0][1])
+      if existingLineIndexList.length
+        @_lines.splice existingLineIndexList[0], 1
+
       @_draftLine = [ cell, cell ]
 
       planeGesture.on 'move', (movePlane) =>
