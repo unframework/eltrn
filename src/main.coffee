@@ -6,10 +6,9 @@ Panel = require('./Panel.coffee')
 UI = require('./UI.coffee')
 
 STEP_COUNT = 16
-TOTAL_LENGTH = 1.73913043 # 4 * (60seconds / 138bpm)
+TOTAL_LENGTH = 8 * 60 / 138
 
 soundData = fs.readFileSync __dirname + '/../sample.mp3'
-convolverSoundData = fs.readFileSync __dirname + '/../echo-chamber.wav'
 
 createAudioContext = ->
   if typeof window.AudioContext isnt 'undefined'
@@ -25,27 +24,21 @@ soundBuffer = null
 context.decodeAudioData convertBuffer(soundData), (buffer) ->
   soundBuffer = buffer
 
-# convolver = context.createConvolver()
-# context.decodeAudioData convertBuffer(soundData), (buffer) ->
-#   convolver.buffer = buffer
-
 # low-pass
-# filter = context.createBiquadFilter()
-# filter.type = 'lowpass'
-# filter.Q.value = 12.5
-# filter.frequency.setValueAtTime 440, context.currentTime
-# filter.frequency.linearRampToValueAtTime 1760, context.currentTime + 8
-# filter.Q.setValueAtTime 15, context.currentTime
-# filter.Q.linearRampToValueAtTime(5, 8)
-
-# filter.connect(convolver)
-# convolver.connect(context.destination)
+filter = context.createBiquadFilter()
+filter.type = 'lowpass'
+filter.Q.value = 52.5
+filter.frequency.setValueAtTime 440, context.currentTime
+filter.frequency.linearRampToValueAtTime 1760, context.currentTime + 8
+filter.Q.setValueAtTime 15, context.currentTime
+filter.Q.linearRampToValueAtTime(5, 8)
+filter.connect(context.destination)
 
 addStep = (startTime, sliceStartTime, sliceLength) ->
   soundSource = context.createBufferSource()
   soundSource.buffer = soundBuffer
-  soundSource.start startTime, sliceStartTime, sliceLength
-  soundSource.connect context.destination
+  soundSource.start startTime, TOTAL_LENGTH + sliceStartTime, sliceLength
+  soundSource.connect filter
 
 runSequence = (startTime, stepList) ->
   for [ stepCol, stepRow, stepCount ] in stepList
