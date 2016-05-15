@@ -28,6 +28,22 @@ class Panel
   _cellIsInBounds: (cell) ->
     cell[0] >= 0 and cell[0] < @_stepCount and cell[1] >= 0 and cell[1] < @_stepCount
 
+  _tryAddDraft: ->
+    # non-positive length check
+    if @_draftLine[0][0] >= @_draftLine[1][0]
+      return
+
+    # non-positive source length check (reversing playback is not yet convenient)
+    if @_draftLine[0][1] >= @_draftLine[1][1]
+      return
+
+    # start overlap check
+    for line in @_lines
+      if @_draftLine[0][0] is line[0][0] and @_draftLine[0][1] is line[0][1]
+        return
+
+    @_lines.push [ @_draftLine[0], @_draftLine[1] ]
+
   startLine: (plane, planeGesture) ->
     cell = @_convertPlane(plane)
 
@@ -41,6 +57,7 @@ class Panel
           @_draftLine[1] = moveCell
 
       planeGesture.on 'end', =>
+        @_tryAddDraft()
         @_draftLine = null
 
 module.exports = Panel
