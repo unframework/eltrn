@@ -20,6 +20,8 @@ class GLWidget
     canvas = createCanvas @_w, @_h
 
     canvas.onmousedown = (e) =>
+      e.preventDefault()
+
       gesture = new EventEmitter()
 
       dx = e.layerX - e.screenX
