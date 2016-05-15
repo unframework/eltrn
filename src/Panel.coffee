@@ -41,4 +41,8 @@ class Panel
   setActiveStep: (index) ->
     @_activeStep = index
 
+  toggleCell: (col, row) ->
+    coord = "#{col}x#{row}"
+    @_selections[coord] = !@_selections[coord]
+
 module.exports = Panel

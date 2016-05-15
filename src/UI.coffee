@@ -65,6 +65,6 @@ class UI
       rayEnd = vec3.fromValues(glX, glY, 1)
       vec3.transformMat4 rayEnd, rayEnd, inverseTransform
 
-      @_panelRenderer.click(rayStart, rayEnd)
+      @_panelRenderer.click(rayStart, rayEnd, @_panel)
 
 module.exports = UI
