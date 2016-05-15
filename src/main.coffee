@@ -50,8 +50,14 @@ filter.connect(context.destination)
 addStep = (startTime, sliceStartTime, sliceLength, sliceSourceLength) ->
   soundSource = context.createBufferSource()
   soundSource.buffer = if sliceSourceLength > 0 then fwdSoundBuffer else revSoundBuffer
-  soundSource.start startTime, TOTAL_LENGTH + sliceStartTime, Math.abs(sliceSourceLength)
-  soundSource.playbackRate.value = Math.abs(sliceSourceLength / sliceLength)
+
+  if sliceSourceLength > 0
+    soundSource.start startTime, TOTAL_LENGTH + sliceStartTime, sliceSourceLength
+    soundSource.playbackRate.value = sliceSourceLength / sliceLength
+  else
+    soundSource.start startTime, TOTAL_LENGTH - sliceStartTime, -sliceSourceLength
+    soundSource.playbackRate.value = -sliceSourceLength / sliceLength
+
   soundSource.connect filter
 
 runSequence = (startTime, stepList) ->
