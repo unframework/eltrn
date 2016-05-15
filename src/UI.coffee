@@ -12,17 +12,20 @@ createCanvas = (w, h) ->
   viewCanvas
 
 class GLWidget
-  constructor: (@_w, @_h, @_onInit, @_onUpdate, @_onClick) ->
+  constructor: (@_w, @_h, @_onInit, @_onUpdate, @_onMove, @_onClick) ->
 
   type: 'Widget'
   init: () ->
     canvas = createCanvas @_w, @_h
 
     canvas.onclick = (e) =>
+      @_onClick()
+
+    canvas.onmousemove = (e) =>
       glX = (e.layerX - @_w * 0.5) / (@_w * 0.5)
       glY = (@_h * 0.5 - e.layerY) / (@_h * 0.5)
 
-      @_onClick glX, glY
+      @_onMove(glX, glY)
 
     @_onInit canvas.getContext('experimental-webgl')
 
@@ -46,6 +49,9 @@ class UI
     w = 800
     h = 600
 
+    rayStart = null
+    rayEnd = null
+
     new GLWidget w, h, (gl) =>
       console.log 'GL init!'
       @_panelRenderer = new PanelRenderer(gl)
@@ -62,9 +68,10 @@ class UI
 
       rayStart = vec3.fromValues(glX, glY, -1)
       vec3.transformMat4 rayStart, rayStart, inverseTransform
+
       rayEnd = vec3.fromValues(glX, glY, 1)
       vec3.transformMat4 rayEnd, rayEnd, inverseTransform
-
+    , () =>
       @_panelRenderer.click(rayStart, rayEnd, @_panel)
 
 module.exports = UI

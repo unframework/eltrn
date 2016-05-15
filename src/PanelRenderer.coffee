@@ -61,9 +61,6 @@ module.exports = class PanelRenderer
         @_gl.drawArrays @_gl.TRIANGLES, 0, 2 * 3
 
   click: (rayStart, rayEnd, panel) ->
-    console.log rayStart[0], rayStart[1], rayStart[2]
-    console.log rayEnd[0], rayEnd[1], rayEnd[2]
-
     normal = vec3.fromValues(0, 0, 1)
 
     kStart = vec3.dot normal, rayStart
