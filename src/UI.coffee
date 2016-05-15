@@ -26,10 +26,7 @@ class GLWidget
     undefined
 
 class UI
-  constructor: (@_stepCount) ->
-    @_activeStep = -1
-    @_selections = Object.create null
-
+  constructor: (@_panel) ->
     @_cameraOffset = vec3.create()
     vec3.set @_cameraOffset, 0, 0, -20
     @_cameraPosition = vec3.create()
@@ -37,41 +34,7 @@ class UI
 
     @_panelRenderer = null
 
-    for i in [0 ... @_stepCount]
-      @_selections["#{i}x#{i}"] = true
-
-  getSteps: ->
-    continuations = Object.create null
-
-    stepList = []
-
-    # walk column-first and find continuous stretches
-    for col in [0 ... @_stepCount]
-      for row in [0 ... @_stepCount]
-        if continuations["#{col}x#{row}"]
-          continue
-
-        stepCount = 0
-        maxStepLength = Math.min(@_stepCount - col, @_stepCount - row)
-
-        for i in [0 ... maxStepLength]
-          coord = "#{col + i}x#{row + i}"
-
-          if !@_selections[coord]
-            break
-
-          stepCount += 1
-          continuations[coord] = true
-
-        if stepCount > 0
-          stepList.push [ parseInt(col, 10) / @_stepCount, parseInt(row, 10) / @_stepCount, stepCount ]
-
-    stepList
-
-  setActiveStep: (index) ->
-    @_activeStep = index
-
-  render: (h) ->
+  render: () ->
     w = 800
     h = 600
 
@@ -85,6 +48,6 @@ class UI
       mat4.rotateX cameraTransform, cameraTransform, -0.3
       mat4.translate cameraTransform, cameraTransform, @_cameraPosition
 
-      @_panelRenderer.draw(cameraTransform, @_stepCount)
+      @_panelRenderer.draw(cameraTransform, @_panel)
 
 module.exports = UI

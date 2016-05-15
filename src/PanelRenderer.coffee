@@ -24,7 +24,7 @@ module.exports = class PanelRenderer
 
     @_panelColor = vec4.fromValues(0.8, 0.8, 0.8, 1)
 
-  draw: (cameraMatrix, stepCount) ->
+  draw: (cameraMatrix, panel) ->
     # general setup
     @_flatShader.bind()
 
@@ -39,10 +39,10 @@ module.exports = class PanelRenderer
     rowPos = vec3.fromValues(0, 0, 0)
     cellScale = vec3.fromValues(0.9, 0.9, 0.9)
 
-    for row in [0 ... stepCount]
-      for col in [0 ... stepCount]
-        rowPos[0] = col - (stepCount - 1) * 0.5
-        rowPos[1] = row - (stepCount - 1) * 0.5
+    for row in [0 ... panel._stepCount]
+      for col in [0 ... panel._stepCount]
+        rowPos[0] = col - (panel._stepCount - 1) * 0.5
+        rowPos[1] = row - (panel._stepCount - 1) * 0.5
 
         mat4.identity(@_modelMatrix)
         mat4.translate(@_modelMatrix, @_modelMatrix, rowPos)

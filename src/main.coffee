@@ -2,6 +2,7 @@ fs = require('fs')
 vdomLive = require('vdom-live')
 convertBuffer = require('buffer-to-arraybuffer')
 
+Panel = require('./Panel.coffee')
 UI = require('./UI.coffee')
 
 STEP_COUNT = 16
@@ -54,7 +55,9 @@ runSequence = (startTime, stepList) ->
     addStep startTime + stepStartTime, sliceStartTime, sliceLength
 
 vdomLive (renderLive) ->
-  ui = new UI(STEP_COUNT)
+  panel = new Panel(STEP_COUNT)
+  ui = new UI(panel)
+
   currentLoopStartTime = null
   nextLoopStartTime = null
 
@@ -71,7 +74,7 @@ vdomLive (renderLive) ->
       if currentLoopStartTime is null
         currentLoopStartTime = nextLoopStartTime
 
-      runSequence nextLoopStartTime, ui.getSteps()
+      runSequence nextLoopStartTime, panel.getSteps()
       nextLoopStartTime += TOTAL_LENGTH
 
     # advance current loop when done
@@ -86,9 +89,9 @@ vdomLive (renderLive) ->
       activeLoopTime = currentTime - currentLoopStartTime
       activeStepIndex = Math.floor(STEP_COUNT * activeLoopTime / TOTAL_LENGTH)
 
-      ui.setActiveStep activeStepIndex
+      panel.setActiveStep activeStepIndex
     else
-      ui.setActiveStep null
+      panel.setActiveStep null
 
   , 10
 
@@ -107,7 +110,7 @@ vdomLive (renderLive) ->
       ' '
       h 'button', { onclick: -> addStep(0, 0, TOTAL_LENGTH) }, 'Play Full Sample'
       h 'div', { style: { height: '20px' } }
-      ui.render(h)
+      ui.render()
     ]
 
   document.body.appendChild liveDOM
