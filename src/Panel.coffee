@@ -34,6 +34,10 @@ class Panel
 
     stepList
 
+  isCellOn: (col, row) ->
+    coord = "#{col}x#{row}"
+    !!@_selections[coord]
+
   setActiveStep: (index) ->
     @_activeStep = index
 
