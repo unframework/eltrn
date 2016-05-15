@@ -25,8 +25,13 @@ class Panel
 
     [ cellCol, cellRow ]
 
-  _cellIsInBounds: (cell) ->
-    cell[0] >= 0 and cell[0] < @_stepCount and cell[1] >= 0 and cell[1] < @_stepCount
+  _constrainCellDimension: (dim) ->
+    if dim < 0
+      0
+    else if dim > @_stepCount
+      @_stepCount
+    else
+      dim
 
   _tryAddDraft: ->
     # non-positive length check
@@ -47,14 +52,16 @@ class Panel
   startLine: (plane, planeGesture) ->
     cell = @_convertPlane(plane)
 
-    if @_cellIsInBounds cell
+    if cell[0] >= 0 and cell[0] <= @_stepCount and cell[1] >= 0 and cell[1] <= @_stepCount
       @_draftLine = [ cell, cell ]
 
       planeGesture.on 'move', (movePlane) =>
         moveCell = @_convertPlane(movePlane)
 
-        if @_cellIsInBounds moveCell
-          @_draftLine[1] = moveCell
+        moveCell[0] = @_constrainCellDimension moveCell[0]
+        moveCell[1] = @_constrainCellDimension moveCell[1]
+
+        @_draftLine[1] = moveCell
 
       planeGesture.on 'end', =>
         @_tryAddDraft()
