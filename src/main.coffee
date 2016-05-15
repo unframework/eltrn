@@ -34,18 +34,20 @@ filter.Q.setValueAtTime 15, context.currentTime
 filter.Q.linearRampToValueAtTime(5, 8)
 filter.connect(context.destination)
 
-addStep = (startTime, sliceStartTime, sliceLength) ->
+addStep = (startTime, sliceStartTime, sliceLength, sliceSourceLength) ->
   soundSource = context.createBufferSource()
   soundSource.buffer = soundBuffer
-  soundSource.start startTime, TOTAL_LENGTH + sliceStartTime, sliceLength
+  soundSource.start startTime, TOTAL_LENGTH + sliceStartTime, sliceSourceLength
+  soundSource.playbackRate.value = sliceSourceLength / sliceLength
   soundSource.connect filter
 
 runSequence = (startTime, stepList) ->
-  for [ stepCol, stepRow, stepCount ] in stepList
+  for [ stepCol, stepRow, stepCount, stepSourceCount ] in stepList
     stepStartTime = stepCol * TOTAL_LENGTH
     sliceStartTime = stepRow * TOTAL_LENGTH
-    sliceLength = stepCount * TOTAL_LENGTH / STEP_COUNT
-    addStep startTime + stepStartTime, sliceStartTime, sliceLength
+    sliceLength = stepCount * TOTAL_LENGTH
+    sliceSourceLength = stepSourceCount * TOTAL_LENGTH
+    addStep startTime + stepStartTime, sliceStartTime, sliceLength, sliceSourceLength
 
 vdomLive (renderLive) ->
   panel = new Panel(STEP_COUNT)

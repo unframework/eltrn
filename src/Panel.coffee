@@ -3,7 +3,7 @@ class Panel
     @_activeStep = -1
 
     @_lines = [
-      [ [ 0, 0 ], [ 16, 16 ] ]
+      [ [ 0, 0 ], [ 16, 8 ] ]
     ]
 
     @_draftLine = null
@@ -13,7 +13,8 @@ class Panel
       line[0][0] / @_stepCount
       line[0][1] / @_stepCount
       (line[1][0] - line[0][0]) / @_stepCount
-    ] for line in @_lines when line[1][0] > line[0][0]
+      (line[1][1] - line[0][1]) / @_stepCount
+    ] for line in @_lines
 
   setActiveStep: (index) ->
     @_activeStep = index
