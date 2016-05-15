@@ -1,3 +1,4 @@
+EventEmitter = require('events').EventEmitter
 vec3 = require('gl-matrix').vec3
 vec4 = require('gl-matrix').vec4
 mat4 = require('gl-matrix').mat4
@@ -12,20 +13,40 @@ createCanvas = (w, h) ->
   viewCanvas
 
 class GLWidget
-  constructor: (@_w, @_h, @_onInit, @_onUpdate, @_onMove, @_onClick) ->
+  constructor: (@_w, @_h, @_onInit, @_onUpdate, @_onDown) ->
 
   type: 'Widget'
   init: () ->
     canvas = createCanvas @_w, @_h
 
-    canvas.onclick = (e) =>
-      @_onClick()
+    canvas.onmousedown = (e) =>
+      gesture = new EventEmitter()
 
-    canvas.onmousemove = (e) =>
+      dx = e.layerX - e.screenX
+      dy = e.layerY - e.screenY
+
+      moveListener = (e) =>
+        lx = e.screenX + dx
+        ly = e.screenY + dy
+        glX = (lx - @_w * 0.5) / (@_w * 0.5)
+        glY = (@_h * 0.5 - ly) / (@_h * 0.5)
+        gesture.emit('data', [ glX, glY ])
+
+        console.log glX, glY
+
+      # @todo when released outside the window, resolve on next click?
+      upListener = =>
+        document.removeEventListener 'mousemove', moveListener, false
+        document.removeEventListener 'mouseup', upListener, false
+        gesture.emit('end')
+
+      document.addEventListener 'mousemove', moveListener, false
+      document.addEventListener 'mouseup', upListener, false
+
       glX = (e.layerX - @_w * 0.5) / (@_w * 0.5)
       glY = (@_h * 0.5 - e.layerY) / (@_h * 0.5)
 
-      @_onMove(glX, glY)
+      @_onDown(glX, glY, gesture)
 
     @_onInit canvas.getContext('experimental-webgl')
 
@@ -49,9 +70,6 @@ class UI
     w = 800
     h = 600
 
-    rayStart = null
-    rayEnd = null
-
     new GLWidget w, h, (gl) =>
       console.log 'GL init!'
       @_panelRenderer = new PanelRenderer(gl)
@@ -62,7 +80,7 @@ class UI
       mat4.translate @_cameraTransform, @_cameraTransform, @_cameraPosition
 
       @_panelRenderer.draw(@_cameraTransform, @_panel)
-    , (glX, glY) =>
+    , (glX, glY, gesture) =>
       inverseTransform = mat4.create()
       mat4.invert inverseTransform, @_cameraTransform
 
@@ -71,7 +89,7 @@ class UI
 
       rayEnd = vec3.fromValues(glX, glY, 1)
       vec3.transformMat4 rayEnd, rayEnd, inverseTransform
-    , () =>
+
       @_panelRenderer.click(rayStart, rayEnd, @_panel)
 
 module.exports = UI
