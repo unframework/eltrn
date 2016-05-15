@@ -27,7 +27,6 @@ module.exports = class PanelRenderer
 
     @_panelCellColor = vec4.fromValues(0.8, 0.8, 0.8, 1)
     @_activeCellColor = vec4.fromValues(0.7, 0.9, 0.7, 1)
-    @_onCellColor = vec4.fromValues(0.9, 0.6, 0.6, 1)
 
   draw: (cameraMatrix, panel) ->
     # general setup
@@ -45,10 +44,8 @@ module.exports = class PanelRenderer
     for row in [0 ... panel._stepCount]
       for col in [0 ... panel._stepCount]
         isActive = col is panel._activeStep
-        isOn = panel.isCellOn(col, row)
-        @_gl.uniform4fv @_flatShader.colorLocation, if isOn
-          @_onCellColor
-        else if isActive
+
+        @_gl.uniform4fv @_flatShader.colorLocation, if isActive
           @_activeCellColor
         else
           @_panelCellColor
@@ -62,6 +59,12 @@ module.exports = class PanelRenderer
 
         @_gl.uniformMatrix4fv @_flatShader.modelLocation, false, @_modelMatrix
         @_gl.drawArrays @_gl.TRIANGLES, 0, 2 * 3
+
+    # lines
+    for line in panel._lines
+      @_pathRenderer.draw cameraMatrix, (addNode) =>
+        addNode line[0][0] - panel._stepCount * 0.5, line[0][1] - panel._stepCount * 0.5
+        addNode line[1][0] - panel._stepCount * 0.5, line[1][1] - panel._stepCount * 0.5
 
     # draft line
     if panel._draftLine
