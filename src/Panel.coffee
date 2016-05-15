@@ -3,7 +3,7 @@ class Panel
     @_activeStep = -1
 
     @_lines = [
-      [ [ 0, 0 ], [ 16, 8 ] ]
+      [ [ 0, 0 ], [ 16, 16 ] ]
     ]
 
     @_draftLine = null
