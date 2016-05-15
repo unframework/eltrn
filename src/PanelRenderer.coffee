@@ -60,7 +60,7 @@ module.exports = class PanelRenderer
         @_gl.uniformMatrix4fv @_flatShader.modelLocation, false, @_modelMatrix
         @_gl.drawArrays @_gl.TRIANGLES, 0, 2 * 3
 
-  click: (rayStart, rayEnd, panel) ->
+  _convertRay: ([ rayStart, rayEnd ], stepCount) ->
     normal = vec3.fromValues(0, 0, 1)
 
     kStart = vec3.dot normal, rayStart
@@ -69,8 +69,10 @@ module.exports = class PanelRenderer
     planeX = rayStart[0] + (-kStart) * (rayEnd[0] - rayStart[0]) / (kEnd - kStart)
     planeY = rayStart[1] + (-kStart) * (rayEnd[1] - rayStart[1]) / (kEnd - kStart)
 
-    cellCol = Math.floor(planeX + panel._stepCount * 0.5)
-    cellRow = Math.floor(planeY + panel._stepCount * 0.5)
+    cellCol = Math.floor(planeX + stepCount * 0.5)
+    cellRow = Math.floor(planeY + stepCount * 0.5)
 
-    if cellCol >= 0 and cellCol < panel._stepCount and cellRow >= 0 and cellRow < panel._stepCount
-      panel.toggleCell cellCol, cellRow
+    return [ cellCol, cellRow ]
+
+  click: (ray, rayGesture, panel) ->
+    panel.startLine @_convertRay(ray, panel._stepCount)

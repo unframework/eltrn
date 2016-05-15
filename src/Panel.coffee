@@ -41,6 +41,12 @@ class Panel
   setActiveStep: (index) ->
     @_activeStep = index
 
+  startLine: (startPos) ->
+    [ cellCol, cellRow ] = startPos
+
+    if cellCol >= 0 and cellCol < @_stepCount and cellRow >= 0 and cellRow < @_stepCount
+      @toggleCell cellCol, cellRow
+
   toggleCell: (col, row) ->
     coord = "#{col}x#{row}"
     @_selections[coord] = !@_selections[coord]

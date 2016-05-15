@@ -30,9 +30,7 @@ class GLWidget
         ly = e.screenY + dy
         glX = (lx - @_w * 0.5) / (@_w * 0.5)
         glY = (@_h * 0.5 - ly) / (@_h * 0.5)
-        gesture.emit('data', [ glX, glY ])
-
-        console.log glX, glY
+        gesture.emit('move', [ glX, glY ])
 
       # @todo when released outside the window, resolve on next click?
       upListener = =>
@@ -46,7 +44,7 @@ class GLWidget
       glX = (e.layerX - @_w * 0.5) / (@_w * 0.5)
       glY = (@_h * 0.5 - e.layerY) / (@_h * 0.5)
 
-      @_onDown(glX, glY, gesture)
+      @_onDown([ glX, glY ], gesture)
 
     @_onInit canvas.getContext('experimental-webgl')
 
@@ -66,6 +64,18 @@ class UI
 
     @_panelRenderer = null
 
+  _convertClick: (pos) ->
+    inverseTransform = mat4.create()
+    mat4.invert inverseTransform, @_cameraTransform
+
+    rayStart = vec3.fromValues(pos[0], pos[1], -1)
+    vec3.transformMat4 rayStart, rayStart, inverseTransform
+
+    rayEnd = vec3.fromValues(pos[0], pos[1], 1)
+    vec3.transformMat4 rayEnd, rayEnd, inverseTransform
+
+    [ rayStart, rayEnd ]
+
   render: () ->
     w = 800
     h = 600
@@ -80,16 +90,14 @@ class UI
       mat4.translate @_cameraTransform, @_cameraTransform, @_cameraPosition
 
       @_panelRenderer.draw(@_cameraTransform, @_panel)
-    , (glX, glY, gesture) =>
-      inverseTransform = mat4.create()
-      mat4.invert inverseTransform, @_cameraTransform
+    , (gesturePos, gesture) =>
+      rayGesture = new EventEmitter()
 
-      rayStart = vec3.fromValues(glX, glY, -1)
-      vec3.transformMat4 rayStart, rayStart, inverseTransform
+      gesture.on 'move', (pos) =>
+        rayGesture.emit 'move', @_convertClick(pos)
+      gesture.on 'end', =>
+        rayGesture.emit 'end'
 
-      rayEnd = vec3.fromValues(glX, glY, 1)
-      vec3.transformMat4 rayEnd, rayEnd, inverseTransform
-
-      @_panelRenderer.click(rayStart, rayEnd, @_panel)
+      @_panelRenderer.click(@_convertClick(gesturePos), rayGesture, @_panel)
 
 module.exports = UI
