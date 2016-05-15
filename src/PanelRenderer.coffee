@@ -59,3 +59,15 @@ module.exports = class PanelRenderer
 
         @_gl.uniformMatrix4fv @_flatShader.modelLocation, false, @_modelMatrix
         @_gl.drawArrays @_gl.TRIANGLES, 0, 2 * 3
+
+  click: (rayStart, rayEnd) ->
+    console.log rayStart[0], rayStart[1], rayStart[2]
+    console.log rayEnd[0], rayEnd[1], rayEnd[2]
+
+    normal = vec3.fromValues(0, 0, 1)
+
+    kStart = vec3.dot normal, rayStart
+    kEnd = vec3.dot normal, rayEnd
+
+    planeX = rayStart[0] + (-kStart) * (rayEnd[0] - rayStart[0]) / (kEnd - kStart)
+    planeY = rayStart[1] + (-kStart) * (rayEnd[1] - rayStart[1]) / (kEnd - kStart)
