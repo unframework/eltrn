@@ -21,21 +21,8 @@ createAudioContext = ->
 context = createAudioContext()
 
 fwdSoundBuffer = null
-revSoundBuffer = null
 context.decodeAudioData convertBuffer(soundData), (buffer) ->
   fwdSoundBuffer = buffer
-
-  revSoundBuffer = context.createBuffer(
-    buffer.numberOfChannels,
-    buffer.length,
-    buffer.sampleRate
-  )
-
-  for channelIndex in [ 0 ... buffer.numberOfChannels ]
-    channelValues = new Float32Array(fwdSoundBuffer.getChannelData(channelIndex))
-    Array.prototype.reverse.call channelValues
-
-    revSoundBuffer.getChannelData(channelIndex).set channelValues
 
 # low-pass
 filter = context.createBiquadFilter()
@@ -47,26 +34,18 @@ filter.Q.setValueAtTime 15, context.currentTime
 filter.Q.linearRampToValueAtTime(5, 8)
 filter.connect(context.destination)
 
-addStep = (startTime, sliceStartTime, sliceLength, sliceSourceLength) ->
+addStep = (startTime, sliceStartTime, sliceLength) ->
   soundSource = context.createBufferSource()
-  soundSource.buffer = if sliceSourceLength > 0 then fwdSoundBuffer else revSoundBuffer
-
-  if sliceSourceLength > 0
-    soundSource.start startTime, TOTAL_LENGTH + sliceStartTime, sliceSourceLength
-    soundSource.playbackRate.value = sliceSourceLength / sliceLength
-  else
-    soundSource.start startTime, TOTAL_LENGTH - sliceStartTime, -sliceSourceLength
-    soundSource.playbackRate.value = -sliceSourceLength / sliceLength
-
+  soundSource.buffer = fwdSoundBuffer
+  soundSource.start startTime, TOTAL_LENGTH + sliceStartTime, sliceLength
   soundSource.connect filter
 
 runSequence = (startTime, stepList) ->
-  for [ stepCol, stepRow, stepCount, stepSourceCount ] in stepList
+  for [ stepCol, stepRow, stepCount ] in stepList
     stepStartTime = stepCol * TOTAL_LENGTH
     sliceStartTime = stepRow * TOTAL_LENGTH
     sliceLength = stepCount * TOTAL_LENGTH
-    sliceSourceLength = stepSourceCount * TOTAL_LENGTH
-    addStep startTime + stepStartTime, sliceStartTime, sliceLength, sliceSourceLength
+    addStep startTime + stepStartTime, sliceStartTime, sliceLength
 
 vdomLive (renderLive) ->
   panel = new Panel(STEP_COUNT)

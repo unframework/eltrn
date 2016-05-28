@@ -4,12 +4,10 @@ vec4 = require('gl-matrix').vec4
 mat4 = require('gl-matrix').mat4
 
 FlatShader = require('./FlatShader.coffee')
-PathRenderer = require('./PathRenderer.coffee')
 
 module.exports = class PanelRenderer
   constructor: (@_gl) ->
     @_flatShader = new FlatShader @_gl
-    @_pathRenderer = new PathRenderer @_gl
 
     @_meshBuffer = @_gl.createBuffer()
     @_gl.bindBuffer @_gl.ARRAY_BUFFER, @_meshBuffer
@@ -27,6 +25,7 @@ module.exports = class PanelRenderer
 
     @_panelCellColor = vec4.fromValues(0.8, 0.8, 0.8, 1)
     @_activeCellColor = vec4.fromValues(0.7, 0.9, 0.7, 1)
+    @_onCellColor = vec4.fromValues(0.9, 0.6, 0.6, 1)
 
   draw: (cameraMatrix, panel) ->
     # general setup
@@ -44,8 +43,11 @@ module.exports = class PanelRenderer
     for row in [0 ... panel._stepCount]
       for col in [0 ... panel._stepCount]
         isActive = col is panel._activeStep
+        isOn = panel.isCellOn(col, row)
 
-        @_gl.uniform4fv @_flatShader.colorLocation, if isActive
+        @_gl.uniform4fv @_flatShader.colorLocation, if isOn
+          @_onCellColor
+        else if isActive
           @_activeCellColor
         else
           @_panelCellColor
@@ -59,18 +61,6 @@ module.exports = class PanelRenderer
 
         @_gl.uniformMatrix4fv @_flatShader.modelLocation, false, @_modelMatrix
         @_gl.drawArrays @_gl.TRIANGLES, 0, 2 * 3
-
-    # lines
-    for line in panel._lines
-      @_pathRenderer.draw cameraMatrix, (addNode) =>
-        addNode line[0][0] - panel._stepCount * 0.5, line[0][1] - panel._stepCount * 0.5
-        addNode line[1][0] - panel._stepCount * 0.5, line[1][1] - panel._stepCount * 0.5
-
-    # draft line
-    if panel._draftLine
-      @_pathRenderer.draw cameraMatrix, (addNode) =>
-        addNode panel._draftLine[0][0] - panel._stepCount * 0.5, panel._draftLine[0][1] - panel._stepCount * 0.5
-        addNode panel._draftLine[1][0] - panel._stepCount * 0.5, panel._draftLine[1][1] - panel._stepCount * 0.5
 
   _convertRay: ([ rayStart, rayEnd ]) ->
     normal = vec3.fromValues(0, 0, 1)
