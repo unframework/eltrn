@@ -48,8 +48,8 @@ class Panel
     @_activeStep = index
 
   _convertPlane: (plane) ->
-    cellCol = Math.round(plane[0] + @_stepCount * 0.5)
-    cellRow = Math.round(plane[1] + @_stepCount * 0.5)
+    cellCol = Math.floor(plane[0] + @_stepCount * 0.5)
+    cellRow = Math.floor(plane[1] + @_stepCount * 0.5)
 
     [ cellCol, cellRow ]
 
