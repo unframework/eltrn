@@ -2,6 +2,8 @@ class Panel
   constructor: (@_stepCount) ->
     @_activeStep = -1
 
+    @_cells = Object.create null
+
     @_lines = [
       [ [ 0, 0 ], [ 16, 16 ] ]
     ]
@@ -25,14 +27,6 @@ class Panel
 
     [ cellCol, cellRow ]
 
-  _constrainCellDimension: (dim) ->
-    if dim < 0
-      0
-    else if dim > @_stepCount
-      @_stepCount
-    else
-      dim
-
   _tryAddDraft: ->
     # non-positive length check
     if @_draftLine[0][0] >= @_draftLine[1][0]
@@ -53,18 +47,20 @@ class Panel
     cell = @_convertPlane(plane)
 
     if cell[0] >= 0 and cell[0] <= @_stepCount and cell[1] >= 0 and cell[1] <= @_stepCount
-      # remove previous line
-      existingLineIndexList = (lineIndex for line, lineIndex in @_lines when cell[0] is line[0][0] and cell[1] is line[0][1])
-      if existingLineIndexList.length
-        @_lines.splice existingLineIndexList[0], 1
-
       @_draftLine = [ cell, cell ]
 
       planeGesture.on 'move', (movePlane) =>
         moveCell = @_convertPlane(movePlane)
 
-        moveCell[0] = @_constrainCellDimension moveCell[0]
-        moveCell[1] = @_constrainCellDimension moveCell[1]
+        dx = moveCell[0] - @_draftLine[0][0]
+        dy = moveCell[1] - @_draftLine[0][1]
+
+        len = Math.round((dx + dy) / 2)
+        len = Math.min(len, Math.min(@_stepCount - @_draftLine[0][0], @_stepCount - @_draftLine[0][1]))
+        len = Math.max(len, Math.max(-@_draftLine[0][0], -@_draftLine[0][1]))
+
+        moveCell[0] = @_draftLine[0][0] + len
+        moveCell[1] = @_draftLine[0][1] + len
 
         @_draftLine[1] = moveCell
 
