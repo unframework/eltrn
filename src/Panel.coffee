@@ -3,6 +3,8 @@ class Panel
     @_activeStep = -1
 
     @_cells = Object.create null
+    for i in [0 ... @_stepCount]
+      @_cells["#{i}x#{i}"] = true
 
     @_draft = null
 
