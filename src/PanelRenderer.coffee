@@ -26,6 +26,7 @@ module.exports = class PanelRenderer
     @_panelCellColor = vec4.fromValues(0.8, 0.8, 0.8, 1)
     @_activeCellColor = vec4.fromValues(0.7, 0.9, 0.7, 1)
     @_onCellColor = vec4.fromValues(0.9, 0.6, 0.6, 1)
+    @_draftCellColor = vec4.fromValues(0.4, 0.4, 0.4, 1)
 
   draw: (cameraMatrix, panel) ->
     # general setup
@@ -43,9 +44,12 @@ module.exports = class PanelRenderer
     for row in [0 ... panel._stepCount]
       for col in [0 ... panel._stepCount]
         isActive = col is panel._activeStep
+        isDraft = panel.isCellDraft(col, row)
         isOn = panel.isCellOn(col, row)
 
-        @_gl.uniform4fv @_flatShader.colorLocation, if isOn
+        @_gl.uniform4fv @_flatShader.colorLocation, if isDraft
+          @_draftCellColor
+        else if isOn
           @_onCellColor
         else if isActive
           @_activeCellColor

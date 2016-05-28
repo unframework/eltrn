@@ -37,6 +37,13 @@ class Panel
     coord = "#{col}x#{row}"
     !!@_cells[coord]
 
+  isCellDraft: (col, row) ->
+    if @_draft
+      dx = col - @_draft[0][0]
+      dy = row - @_draft[0][1]
+
+      dx is dy and dx >= @_draft[1] and dx <= @_draft[2]
+
   setActiveStep: (index) ->
     @_activeStep = index
 
@@ -48,17 +55,18 @@ class Panel
 
   _tryAddDraft: ->
     [ x, y ] = @_draft[0]
-    len = @_draft[1]
+    below = @_draft[1]
+    above = @_draft[2]
 
     newValue = !@_cells["#{x}x#{y}"]
 
-    while len > 0
-      len -= 1
-      @_cells["#{x + len}x#{y + len}"] = newValue
+    while below < 0
+      below += 1
+      @_cells["#{x + below}x#{y + below}"] = newValue
 
-    while len < 0
-      len += 1
-      @_cells["#{x + len}x#{y + len}"] = newValue
+    while above > 0
+      above -= 1
+      @_cells["#{x + above}x#{y + above}"] = newValue
 
     @_cells["#{x}x#{y}"] = newValue
 
@@ -66,7 +74,7 @@ class Panel
     cell = @_convertPlane(plane)
 
     if cell[0] >= 0 and cell[0] <= @_stepCount and cell[1] >= 0 and cell[1] <= @_stepCount
-      @_draft = [ cell, 0 ]
+      @_draft = [ cell, 0, 0 ]
 
       planeGesture.on 'move', (movePlane) =>
         moveCell = @_convertPlane(movePlane)
@@ -78,7 +86,8 @@ class Panel
         len = Math.min(len, Math.min(@_stepCount - @_draft[0][0], @_stepCount - @_draft[0][1]))
         len = Math.max(len, Math.max(-@_draft[0][0], -@_draft[0][1]))
 
-        @_draft[1] = len
+        @_draft[1] = Math.min(len, 0)
+        @_draft[2] = Math.max(0, len)
 
       planeGesture.on 'end', =>
         @_tryAddDraft()
