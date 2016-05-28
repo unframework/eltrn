@@ -61,12 +61,12 @@ class Panel
     newValue = !@_cells["#{x}x#{y}"]
 
     while below < 0
-      below += 1
       @_cells["#{x + below}x#{y + below}"] = newValue
+      below += 1
 
     while above > 0
-      above -= 1
       @_cells["#{x + above}x#{y + above}"] = newValue
+      above -= 1
 
     @_cells["#{x}x#{y}"] = newValue
 
