@@ -37,8 +37,8 @@ filter.connect(context.destination)
 addStep = (startTime, sliceStartTime, sliceLength) ->
   soundSource = context.createBufferSource()
   soundSource.buffer = fwdSoundBuffer
-  soundSource.start startTime, TOTAL_LENGTH + sliceStartTime, sliceLength
-  soundSource.connect filter
+  soundSource.start startTime, sliceStartTime, sliceLength
+  soundSource.connect context.destination
 
 runSequence = (startTime, stepList) ->
   for [ stepCol, stepRow, stepCount ] in stepList
