@@ -52,7 +52,7 @@ vdomLive (renderLive) ->
       if currentPlayback isnt null
         h 'button', { style: { fontSize: '24px' }, onclick: -> currentPlayback.stop(); currentPlayback = null }, 'Stop'
       else
-        h 'button', { style: { fontSize: '24px' }, onclick: -> currentPlayback = new Playback(context, fwdSoundBuffer, panel) }, 'Play'
+        h 'button', { style: { fontSize: '24px' }, onclick: -> currentPlayback = new Playback(context, fwdSoundBuffer, STEP_COUNT, TOTAL_LENGTH, panel) }, 'Play'
       ' '
       h 'div', { style: { height: '20px' } }
       ui.render()

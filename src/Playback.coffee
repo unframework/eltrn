@@ -1,20 +1,17 @@
-STEP_COUNT = 16
-TOTAL_LENGTH = 8 * 60 / 138
-
 class Playback
-  constructor: (@_context, @_soundBuffer, @_panel) ->
+  constructor: (@_context, @_soundBuffer, @_stepCount, @_totalLength, @_panel) ->
     activeChannelSet = []
 
     # extend current playing channels by one more step
     extendChannels = (stepStartTime, stepIndex, stepList) =>
-      stepPos = stepIndex / STEP_COUNT
-      stepEndTime = stepStartTime + TOTAL_LENGTH / STEP_COUNT
+      stepPos = stepIndex / @_stepCount
+      stepEndTime = stepStartTime + @_totalLength / @_stepCount
 
       touchedSet = []
 
       for [ stepCol, stepRow, stepCount ] in stepList
         if stepPos >= stepCol and stepPos < stepCol + stepCount
-          channelIndex = (STEP_COUNT + STEP_COUNT * stepRow - STEP_COUNT * stepCol) % STEP_COUNT
+          channelIndex = (@_stepCount + @_stepCount * stepRow - @_stepCount * stepCol) % @_stepCount
 
           touchedSet[channelIndex] = true
           currentChannelNode = activeChannelSet[channelIndex]
@@ -23,7 +20,7 @@ class Playback
           if not currentChannelNode or stepIndex is 0
             soundSource = @_context.createBufferSource()
             soundSource.buffer = @_soundBuffer
-            soundSource.start stepStartTime, stepRow * TOTAL_LENGTH
+            soundSource.start stepStartTime, stepRow * @_totalLength
             soundSource.connect @_context.destination
 
             currentChannelNode = activeChannelSet[channelIndex] = soundSource
@@ -47,16 +44,16 @@ class Playback
 
       # activate next step when we are at least one interval away
       nextLoopTime = currentTime + 0.03 - currentLoopStartTime
-      nextStepIndex = Math.floor(STEP_COUNT * nextLoopTime / TOTAL_LENGTH)
+      nextStepIndex = Math.floor(@_stepCount * nextLoopTime / @_totalLength)
 
-      while nextStepIndex >= STEP_COUNT
-        nextStepIndex -= STEP_COUNT
-        currentLoopStartTime += TOTAL_LENGTH
+      while nextStepIndex >= @_stepCount
+        nextStepIndex -= @_stepCount
+        currentLoopStartTime += @_totalLength
 
       if nextStepIndex isnt currentStepIndex
         currentStepIndex = nextStepIndex
 
-        nextStepStartTime = currentLoopStartTime + TOTAL_LENGTH * nextStepIndex / STEP_COUNT
+        nextStepStartTime = currentLoopStartTime + @_totalLength * nextStepIndex / @_stepCount
 
         extendChannels nextStepStartTime, nextStepIndex, @_panel.getSteps()
 
