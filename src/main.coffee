@@ -35,13 +35,6 @@ filter.Q.setValueAtTime 15, context.currentTime
 filter.Q.linearRampToValueAtTime(5, 8)
 filter.connect(context.destination)
 
-addStep = (startTime, sliceStartTime, sliceLength) ->
-  soundSource = context.createBufferSource()
-  soundSource.buffer = fwdSoundBuffer
-  soundSource.start startTime, sliceStartTime, sliceLength
-  soundSource.connect context.destination
-
-
 vdomLive (renderLive) ->
   panel = new Panel(STEP_COUNT)
   ui = new UI(panel)
@@ -61,7 +54,6 @@ vdomLive (renderLive) ->
       else
         h 'button', { style: { fontSize: '24px' }, onclick: -> currentPlayback = new Playback(context, fwdSoundBuffer, panel) }, 'Play'
       ' '
-      h 'button', { onclick: -> addStep(0, 0, TOTAL_LENGTH) }, 'Play Full Sample'
       h 'div', { style: { height: '20px' } }
       ui.render()
     ]
