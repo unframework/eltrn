@@ -4,6 +4,7 @@ convertBuffer = require('buffer-to-arraybuffer')
 
 Panel = require('./Panel.coffee')
 UI = require('./UI.coffee')
+Playback = require('./Playback.coffee')
 
 STEP_COUNT = 16
 TOTAL_LENGTH = 8 * 60 / 138
@@ -40,53 +41,12 @@ addStep = (startTime, sliceStartTime, sliceLength) ->
   soundSource.start startTime, sliceStartTime, sliceLength
   soundSource.connect context.destination
 
-runSequence = (startTime, stepList) ->
-  for [ stepCol, stepRow, stepCount ] in stepList
-    stepStartTime = stepCol * TOTAL_LENGTH
-    sliceStartTime = stepRow * TOTAL_LENGTH
-    sliceLength = stepCount * TOTAL_LENGTH
-    addStep startTime + stepStartTime, sliceStartTime, sliceLength
 
 vdomLive (renderLive) ->
   panel = new Panel(STEP_COUNT)
   ui = new UI(panel)
 
-  currentLoopStartTime = null
-  nextLoopStartTime = null
-
-  setInterval ->
-    currentTime = context.currentTime
-
-    # schedule next loop
-    if nextLoopStartTime isnt null and nextLoopStartTime < currentTime + 0.2
-      # avoid starting in the past
-      if nextLoopStartTime < currentTime
-        nextLoopStartTime = currentTime
-
-      # start current loop display
-      if currentLoopStartTime is null
-        currentLoopStartTime = nextLoopStartTime
-
-      runSequence nextLoopStartTime, panel.getSteps()
-      nextLoopStartTime += TOTAL_LENGTH
-
-    # advance current loop when done
-    if currentLoopStartTime isnt null and currentTime > currentLoopStartTime + TOTAL_LENGTH
-      if nextLoopStartTime isnt null
-        currentLoopStartTime += TOTAL_LENGTH
-      else
-        currentLoopStartTime = null
-
-    # display current loop if active
-    if currentLoopStartTime isnt null
-      activeLoopTime = currentTime - currentLoopStartTime
-      activeStepIndex = Math.floor(STEP_COUNT * activeLoopTime / TOTAL_LENGTH)
-
-      panel.setActiveStep activeStepIndex
-    else
-      panel.setActiveStep null
-
-  , 10
+  currentPlayback = null
 
   document.body.style.textAlign = 'center';
   liveDOM = renderLive (h) ->
@@ -96,10 +56,10 @@ vdomLive (renderLive) ->
         marginTop: '50px'
       }
     }, [
-      if nextLoopStartTime isnt null
-        h 'button', { style: { fontSize: '24px' }, onclick: -> currentLoopStartTime = null; nextLoopStartTime = null }, 'Stop'
+      if currentPlayback isnt null
+        h 'button', { style: { fontSize: '24px' }, onclick: -> currentPlayback.stop(); currentPlayback = null }, 'Stop'
       else
-        h 'button', { style: { fontSize: '24px' }, onclick: -> nextLoopStartTime = context.currentTime }, 'Play'
+        h 'button', { style: { fontSize: '24px' }, onclick: -> currentPlayback = new Playback(context, fwdSoundBuffer, panel) }, 'Play'
       ' '
       h 'button', { onclick: -> addStep(0, 0, TOTAL_LENGTH) }, 'Play Full Sample'
       h 'div', { style: { height: '20px' } }
