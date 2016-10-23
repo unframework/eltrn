@@ -49,6 +49,7 @@ class GLWidget
       @_onDown([ glX, glY ], gesture)
 
     @_onInit canvas.getContext('experimental-webgl')
+    @_onUpdate()
 
     canvas
 
