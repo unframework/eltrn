@@ -1,6 +1,4 @@
-fs = require('fs')
 vdomLive = require('vdom-live')
-convertBuffer = require('buffer-to-arraybuffer')
 
 Panel = require('./Panel.coffee')
 UI = require('./UI.coffee')
@@ -8,8 +6,6 @@ Playback = require('./Playback.coffee')
 
 STEP_COUNT = 16
 TOTAL_LENGTH = 8 * 60 / 138
-
-soundData = fs.readFileSync __dirname + '/../sample.mp3'
 
 createAudioContext = ->
   if typeof window.AudioContext isnt 'undefined'
@@ -21,9 +17,25 @@ createAudioContext = ->
 
 context = createAudioContext()
 
-fwdSoundBuffer = null
-context.decodeAudioData convertBuffer(soundData), (buffer) ->
-  fwdSoundBuffer = buffer
+loadData = (url, cb) ->
+  request = new XMLHttpRequest()
+  request.open 'GET', url, true
+  request.responseType = 'arraybuffer'
+
+  request.onload = ->
+    done = false
+
+    context.decodeAudioData request.response, (buffer) ->
+      done = true
+      cb buffer
+
+    # silly hack to make sure that screen refreshes on load
+    intervalId = setInterval (->
+      if done
+        clearInterval intervalId
+    ), 300
+
+  request.send();
 
 # low-pass
 filter = context.createBiquadFilter()
@@ -39,11 +51,15 @@ vdomLive (renderLive) ->
   panel = new Panel(STEP_COUNT)
   ui = new UI(panel)
 
+  fwdSoundBuffer = null
+  loadData 'sample.mp3', (buffer) ->
+    fwdSoundBuffer = buffer
+
   currentPlayback = null
 
   document.body.style.textAlign = 'center';
   liveDOM = renderLive (h) ->
-    h 'div', {
+    if fwdSoundBuffer then h 'div', {
       style: {
         display: 'inline-block'
         marginTop: '50px'
@@ -56,6 +72,6 @@ vdomLive (renderLive) ->
       ' '
       h 'div', { style: { height: '20px' } }
       ui.render()
-    ]
+    ] else h 'div', [ 'Loading sound sample' ]
 
   document.body.appendChild liveDOM
