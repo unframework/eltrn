@@ -1,11 +1,16 @@
 class Playback
   constructor: (@_context, @_soundBuffer, @_stepCount, @_totalLength, @_panel) ->
-    activeChannelSet = []
+    @_activeChannelSet = []
 
     # extend current playing channels by one more step
     extendChannels = (stepStartTime, stepIndex, stepList) =>
       stepPos = stepIndex / @_stepCount
-      stepEndTime = stepStartTime + @_totalLength / @_stepCount
+
+      # clear all play when restarting loop
+      if stepIndex is 0
+        for node, i in @_activeChannelSet when node
+          node.stop stepStartTime
+          @_activeChannelSet[i] = null
 
       touchedSet = []
 
@@ -14,25 +19,23 @@ class Playback
           channelIndex = (@_stepCount + @_stepCount * stepRow - @_stepCount * stepCol) % @_stepCount
 
           touchedSet[channelIndex] = true
-          currentChannelNode = activeChannelSet[channelIndex]
+          currentChannelNode = @_activeChannelSet[channelIndex]
 
-          # always start a new sound at beginning of measure
-          if not currentChannelNode or stepIndex is 0
+          # start the new channel play without explicit stop
+          if not currentChannelNode
             soundSource = @_context.createBufferSource()
             soundSource.buffer = @_soundBuffer
             soundSource.start stepStartTime, stepRow * @_totalLength
             soundSource.connect @_context.destination
 
-            currentChannelNode = activeChannelSet[channelIndex] = soundSource
+            currentChannelNode = @_activeChannelSet[channelIndex] = soundSource
 
-          # adjust stop time to next step boundary
-          # @todo this fails in Chrome/Safari on iPad on second call: https://github.com/webaudio/web-audio-api/issues/15
-          currentChannelNode.stop stepEndTime
-
-      # unlink stale sources
-      for node, i in activeChannelSet
-        if node and not touchedSet[i]
-          activeChannelSet[i] = null
+      # unlink and stop stale sources
+      for node, i in @_activeChannelSet when node
+        if not touchedSet[i]
+          # set to stop at beginning of given new step
+          @_activeChannelSet[i].stop stepStartTime
+          @_activeChannelSet[i] = null
 
     currentLoopStartTime = @_context.currentTime
     currentStepIndex = null
@@ -65,6 +68,10 @@ class Playback
   stop: ->
     clearInterval @_intervalId
     @_intervalId = null
+
+    for node, i in @_activeChannelSet
+      node.stop @_context.currentTime
+      @_activeChannelSet[i] = null
 
     @_panel.setActiveStep null
 
