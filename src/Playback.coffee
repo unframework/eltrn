@@ -25,6 +25,8 @@ class Playback
 
             currentChannelNode = activeChannelSet[channelIndex] = soundSource
 
+          # adjust stop time to next step boundary
+          # @todo this fails in Chrome/Safari on iPad on second call: https://github.com/webaudio/web-audio-api/issues/15
           currentChannelNode.stop stepEndTime
 
       # unlink stale sources
@@ -57,7 +59,7 @@ class Playback
 
         extendChannels nextStepStartTime, nextStepIndex, @_panel.getSteps()
 
-        @_panel.setActiveStep nextStepIndex
+        @_panel.setActiveStep nextStepIndex # @todo pull instead of push (get renderer to track current playback)
     , 20
 
   stop: ->
