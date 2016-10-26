@@ -48,8 +48,22 @@ filter.Q.linearRampToValueAtTime(5, 8)
 filter.connect(context.destination)
 
 vdomLive (renderLive) ->
+  # apparently vdom-live doesn't listen to onxyz events on iPad Chrome?
+  # @todo fix
+  renderZone = global.zone
+  wrapZoneCb = (cb) ->
+    return ->
+      origThis = this
+      origArguments = Array.prototype.slice.call arguments
+
+      if global.zone is renderZone
+        cb.apply origThis, origArguments
+      else
+        renderZone.run ->
+          cb.apply origThis, origArguments
+
   panel = new Panel(STEP_COUNT)
-  ui = new UI(panel)
+  ui = new UI(panel, wrapZoneCb)
 
   fwdSoundBuffer = null
   loadData 'sample.mp3', (buffer) ->
@@ -66,9 +80,9 @@ vdomLive (renderLive) ->
       }
     }, [
       if currentPlayback isnt null
-        h 'button', { style: { fontSize: '24px' }, onclick: -> currentPlayback.stop(); currentPlayback = null }, 'Stop'
+        h 'button', { style: { fontSize: '24px' }, onclick: wrapZoneCb -> currentPlayback.stop(); currentPlayback = null }, 'Stop'
       else
-        h 'button', { style: { fontSize: '24px' }, onclick: -> currentPlayback = new Playback(context, fwdSoundBuffer, STEP_COUNT, TOTAL_LENGTH, panel) }, 'Play'
+        h 'button', { style: { fontSize: '24px' }, onclick: wrapZoneCb -> currentPlayback = new Playback(context, fwdSoundBuffer, STEP_COUNT, TOTAL_LENGTH, panel) }, 'Play'
       ' '
       h 'div', { style: { height: '20px' } }
       ui.render()

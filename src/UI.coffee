@@ -13,13 +13,13 @@ createCanvas = (w, h) ->
   viewCanvas
 
 class GLWidget
-  constructor: (@_w, @_h, @_onInit, @_onUpdate, @_onDown) ->
+  constructor: (@_w, @_h, @_onInit, @_onUpdate, @_onDown, @_wrapCb) ->
 
   type: 'Widget'
   init: () ->
     canvas = createCanvas @_w, @_h
 
-    canvas.onmousedown = (e) =>
+    canvas.onmousedown = @_wrapCb (e) =>
       e.preventDefault()
 
       gesture = new EventEmitter()
@@ -27,7 +27,7 @@ class GLWidget
       dx = e.layerX - e.screenX
       dy = e.layerY - e.screenY
 
-      moveListener = (e) =>
+      moveListener = @_wrapCb (e) =>
         lx = e.screenX + dx
         ly = e.screenY + dy
         glX = (lx - @_w * 0.5) / (@_w * 0.5)
@@ -35,7 +35,7 @@ class GLWidget
         gesture.emit('move', [ glX, glY ])
 
       # @todo when released outside the window, resolve on next click?
-      upListener = =>
+      upListener = @_wrapCb =>
         document.removeEventListener 'mousemove', moveListener, false
         document.removeEventListener 'mouseup', upListener, false
         gesture.emit('end')
@@ -48,7 +48,7 @@ class GLWidget
 
       @_onDown([ glX, glY ], gesture)
 
-    canvas.ontouchstart = (e) =>
+    canvas.ontouchstart = @_wrapCb (e) =>
       e.preventDefault()
 
       gesture = new EventEmitter()
@@ -57,7 +57,7 @@ class GLWidget
       dx = e.layerX - e.touches[0].screenX
       dy = e.layerY - e.touches[0].screenY
 
-      moveListener = (e) =>
+      moveListener = @_wrapCb (e) =>
         lx = e.touches[0].screenX + dx
         ly = e.touches[0].screenY + dy
         glX = (lx - @_w * 0.5) / (@_w * 0.5)
@@ -65,7 +65,7 @@ class GLWidget
         gesture.emit('move', [ glX, glY ])
 
       # @todo when released outside the window, resolve on next click?
-      upListener = =>
+      upListener = @_wrapCb =>
         document.removeEventListener 'touchmove', moveListener, false
         document.removeEventListener 'touchend', upListener, false
         gesture.emit('end')
@@ -88,7 +88,7 @@ class GLWidget
     undefined
 
 class UI
-  constructor: (@_panel) ->
+  constructor: (@_panel, @_wrapCb) ->
     @_cameraTransform = mat4.create()
     @_cameraOffset = vec3.create()
     vec3.set @_cameraOffset, 0, 0, -20
@@ -138,5 +138,6 @@ class UI
         @_currentGesture = null
 
       @_panelRenderer.click(@_convertClick(gesturePos), rayGesture, @_panel)
+    , @_wrapCb
 
 module.exports = UI
