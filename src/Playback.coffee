@@ -69,7 +69,7 @@ class Playback
     clearInterval @_intervalId
     @_intervalId = null
 
-    for node, i in @_activeChannelSet
+    for node, i in @_activeChannelSet when node
       node.stop @_context.currentTime
       @_activeChannelSet[i] = null
 
