@@ -95,6 +95,7 @@ class UI
     @_cameraPosition = vec3.create()
     vec3.set @_cameraPosition, 0, 0, 2
 
+    @_currentGesture = null
     @_panelRenderer = null
 
   _convertClick: (pos) ->
@@ -124,12 +125,17 @@ class UI
 
       @_panelRenderer.draw(@_cameraTransform, @_panel)
     , (gesturePos, gesture) =>
+      if @_currentGesture
+        return
+
       rayGesture = new EventEmitter()
+      @_currentGesture = rayGesture
 
       gesture.on 'move', (pos) =>
         rayGesture.emit 'move', @_convertClick(pos)
       gesture.on 'end', =>
         rayGesture.emit 'end'
+        @_currentGesture = null
 
       @_panelRenderer.click(@_convertClick(gesturePos), rayGesture, @_panel)
 
