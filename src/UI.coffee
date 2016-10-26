@@ -48,6 +48,36 @@ class GLWidget
 
       @_onDown([ glX, glY ], gesture)
 
+    canvas.ontouchstart = (e) =>
+      e.preventDefault()
+
+      gesture = new EventEmitter()
+
+      # @todo use touch id
+      dx = e.touches[0].layerX - e.touches[0].screenX
+      dy = e.touches[0].layerY - e.touches[0].screenY
+
+      moveListener = (e) =>
+        lx = e.touches[0].screenX + dx
+        ly = e.touches[0].screenY + dy
+        glX = (lx - @_w * 0.5) / (@_w * 0.5)
+        glY = (@_h * 0.5 - ly) / (@_h * 0.5)
+        gesture.emit('move', [ glX, glY ])
+
+      # @todo when released outside the window, resolve on next click?
+      upListener = =>
+        document.removeEventListener 'touchmove', moveListener, false
+        document.removeEventListener 'touchend', upListener, false
+        gesture.emit('end')
+
+      document.addEventListener 'touchmove', moveListener, false
+      document.addEventListener 'touchend', upListener, false
+
+      glX = (e.layerX - @_w * 0.5) / (@_w * 0.5)
+      glY = (@_h * 0.5 - e.layerY) / (@_h * 0.5)
+
+      @_onDown([ glX, glY ], gesture)
+
     @_onInit canvas.getContext('experimental-webgl')
     @_onUpdate()
 
