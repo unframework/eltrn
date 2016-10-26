@@ -54,8 +54,8 @@ class GLWidget
       gesture = new EventEmitter()
 
       # @todo use touch id
-      dx = e.touches[0].layerX - e.touches[0].screenX
-      dy = e.touches[0].layerY - e.touches[0].screenY
+      dx = e.layerX - e.touches[0].screenX
+      dy = e.layerY - e.touches[0].screenY
 
       moveListener = (e) =>
         lx = e.touches[0].screenX + dx
