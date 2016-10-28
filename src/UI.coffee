@@ -24,12 +24,12 @@ class GLWidget
 
       gesture = new EventEmitter()
 
-      dx = e.layerX - e.screenX
-      dy = e.layerY - e.screenY
+      dx = -canvas.offsetLeft
+      dy = -canvas.offsetTop
 
       moveListener = @_wrapCb (e) =>
-        lx = e.screenX + dx
-        ly = e.screenY + dy
+        lx = e.clientX + dx
+        ly = e.clientY + dy
         glX = (lx - @_w * 0.5) / (@_w * 0.5)
         glY = (@_h * 0.5 - ly) / (@_h * 0.5)
         gesture.emit('move', [ glX, glY ])
@@ -43,8 +43,8 @@ class GLWidget
       document.addEventListener 'mousemove', moveListener, false
       document.addEventListener 'mouseup', upListener, false
 
-      glX = (e.layerX - @_w * 0.5) / (@_w * 0.5)
-      glY = (@_h * 0.5 - e.layerY) / (@_h * 0.5)
+      glX = (e.clientX + dx - @_w * 0.5) / (@_w * 0.5)
+      glY = (@_h * 0.5 - e.clientY - dy) / (@_h * 0.5)
 
       @_onDown([ glX, glY ], gesture)
 
@@ -54,12 +54,12 @@ class GLWidget
       gesture = new EventEmitter()
 
       # @todo use touch id
-      dx = e.layerX - e.touches[0].screenX
-      dy = e.layerY - e.touches[0].screenY
+      dx = -canvas.offsetLeft
+      dy = -canvas.offsetTop
 
       moveListener = @_wrapCb (e) =>
-        lx = e.touches[0].screenX + dx
-        ly = e.touches[0].screenY + dy
+        lx = e.touches[0].clientX + dx
+        ly = e.touches[0].clientY + dy
         glX = (lx - @_w * 0.5) / (@_w * 0.5)
         glY = (@_h * 0.5 - ly) / (@_h * 0.5)
         gesture.emit('move', [ glX, glY ])
@@ -73,8 +73,8 @@ class GLWidget
       document.addEventListener 'touchmove', moveListener, false
       document.addEventListener 'touchend', upListener, false
 
-      glX = (e.layerX - @_w * 0.5) / (@_w * 0.5)
-      glY = (@_h * 0.5 - e.layerY) / (@_h * 0.5)
+      glX = (e.touches[0].clientX + dx - @_w * 0.5) / (@_w * 0.5)
+      glY = (@_h * 0.5 - e.touches[0].clientY - dy) / (@_h * 0.5)
 
       @_onDown([ glX, glY ], gesture)
 
