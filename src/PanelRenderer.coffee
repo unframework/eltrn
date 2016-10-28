@@ -28,7 +28,7 @@ module.exports = class PanelRenderer
     @_onCellColor = vec4.fromValues(0.9, 0.6, 0.6, 1)
     @_draftCellColor = vec4.fromValues(0.4, 0.4, 0.4, 1)
 
-  draw: (cameraMatrix, panel) ->
+  draw: (cameraMatrix, panel, playback) ->
     # general setup
     @_flatShader.bind()
 
@@ -43,7 +43,7 @@ module.exports = class PanelRenderer
 
     for row in [0 ... panel._stepCount]
       for col in [0 ... panel._stepCount]
-        isActive = col is panel._activeStep
+        isActive = playback isnt null and col is playback._activeStep
         isDraft = panel.isCellDraft(col, row)
         isOn = panel.isCellOn(col, row)
 

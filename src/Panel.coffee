@@ -1,7 +1,5 @@
 class Panel
   constructor: (@_stepCount) ->
-    @_activeStep = -1
-
     @_cells = Object.create null
     for i in [0 ... @_stepCount]
       @_cells["#{i}x#{i}"] = true
@@ -45,9 +43,6 @@ class Panel
       dy = row - @_draft[0][1]
 
       dx is dy and dx >= @_draft[1] and dx <= @_draft[2]
-
-  setActiveStep: (index) ->
-    @_activeStep = index
 
   _convertPlane: (plane) ->
     cellCol = Math.floor(plane[0] + @_stepCount * 0.5)

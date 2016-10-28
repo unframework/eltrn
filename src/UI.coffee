@@ -110,7 +110,7 @@ class UI
 
     [ rayStart, rayEnd ]
 
-  render: () ->
+  render: (playback) ->
     w = 800
     h = 600
 
@@ -123,7 +123,7 @@ class UI
       mat4.rotateX @_cameraTransform, @_cameraTransform, -0.3
       mat4.translate @_cameraTransform, @_cameraTransform, @_cameraPosition
 
-      @_panelRenderer.draw(@_cameraTransform, @_panel)
+      @_panelRenderer.draw(@_cameraTransform, @_panel, playback)
     , (gesturePos, gesture) =>
       if @_currentGesture
         return

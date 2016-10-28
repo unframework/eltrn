@@ -1,6 +1,7 @@
 class Playback
   constructor: (@_context, @_soundBuffer, @_stepCount, @_totalLength, @_panel) ->
     @_activeChannelSet = []
+    @_activeStep = 0
 
     # extend current playing channels by one more step
     extendChannels = (stepStartTime, stepIndex, stepList) =>
@@ -42,7 +43,6 @@ class Playback
 
     # @todo weird doubling of sound when first starting
     extendChannels currentLoopStartTime, 0, @_panel.getSteps()
-    @_panel.setActiveStep 0
 
     @_intervalId = setInterval =>
       currentTime = @_context.currentTime
@@ -61,8 +61,7 @@ class Playback
         nextStepStartTime = currentLoopStartTime + @_totalLength * nextStepIndex / @_stepCount
 
         extendChannels nextStepStartTime, nextStepIndex, @_panel.getSteps()
-
-        @_panel.setActiveStep nextStepIndex # @todo pull instead of push (get renderer to track current playback)
+        @_activeStep = nextStepIndex
     , 20
 
   stop: ->
@@ -72,7 +71,5 @@ class Playback
     for node, i in @_activeChannelSet when node
       node.stop @_context.currentTime
       @_activeChannelSet[i] = null
-
-    @_panel.setActiveStep null
 
 module.exports = Playback

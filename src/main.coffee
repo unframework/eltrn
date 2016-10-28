@@ -85,7 +85,7 @@ vdomLive (renderLive) ->
         h 'button', { style: { fontSize: '24px' }, onclick: wrapZoneCb -> currentPlayback = new Playback(context, fwdSoundBuffer, STEP_COUNT, TOTAL_LENGTH, panel) }, 'Play'
       ' '
       h 'div', { style: { height: '20px' } }
-      ui.render()
+      ui.render(currentPlayback)
     ] else h 'div', [ 'Loading sound sample' ]
 
   document.body.appendChild liveDOM
