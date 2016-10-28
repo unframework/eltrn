@@ -58,6 +58,7 @@ module.exports = class PanelRenderer
 
         rowPos[0] = col - (panel._stepCount - 1) * 0.5
         rowPos[1] = row - (panel._stepCount - 1) * 0.5
+        rowPos[2] = if isActive then (if isOn then 0.2 else 0.1) else 0
 
         mat4.identity(@_modelMatrix)
         mat4.translate(@_modelMatrix, @_modelMatrix, rowPos)
