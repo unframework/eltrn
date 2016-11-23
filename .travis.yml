@@ -1,0 +1,10 @@
+sudo: false
+branches:
+  only:
+    - master
+    - gh-publish # @todo remove
+
+language: node_js
+
+after_success:
+  - echo 'Publishing to GitHub Pages'
