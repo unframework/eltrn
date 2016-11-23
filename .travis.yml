@@ -4,6 +4,10 @@ branches:
     - master
     - gh-publish # @todo remove
 
+env:
+  global:
+    ENCRYPTION_LABEL: ad2ba5d85fda
+
 language: node_js
 
 # @todo ignore PRs
@@ -11,8 +15,16 @@ after_success:
   - echo 'Publishing to GitHub Pages'
   - git config user.name 'TravisCI Auto-publisher'
   - git config user.email 'travis-auto-publish@example.com'
+  - export encKeyVar="encrypted_${ENCRYPTION_LABEL}_key"
+  - export encIVVar="encrypted_${ENCRYPTION_LABEL}_iv"
   - node_modules/.bin/browserify index.js > index-browserify.js &&
     mv index-browserify.js index.js &&
     git add index.js &&
-    git commit -m 'Auto-publishing via TravisCI'
-  - git show -s
+    git commit -m 'Auto-publishing via TravisCI' &&
+    (
+      eval `ssh-agent -s`;
+      openssl aes-256-cbc -K "${!encKeyVar}" -iv "${!encIVVar}" -in gh-publish.key.enc -out gh-publish.key -d &&
+      chmod go-rw gh-publish.key &&
+      ssh-add gh-publish.key &&
+      git push origin +HEAD:gh-pages
+    )
