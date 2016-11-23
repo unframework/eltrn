@@ -9,6 +9,8 @@ language: node_js
 # @todo ignore PRs
 after_success:
   - echo 'Publishing to GitHub Pages'
-  - node_modules/.bin/browserify index.js > index-browserify.js && mv index-browserify.js index.js
-  - git add index.js
-  - git status
+  - node_modules/.bin/browserify index.js > index-browserify.js &&
+    mv index-browserify.js index.js &&
+    git add index.js &&
+    git commit -m 'Auto-publishing via TravisCI' --author 'TravisCI Auto-publisher <travisci@example.com>'
+  - git show -s
