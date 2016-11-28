@@ -7,8 +7,9 @@ Demo: http://unframework.github.io/eltrn/ (also see early test video at https://
 ## GH Publishing
 
 - set up `.travis.yml` file
-- `ssh-keygen -t rsa -b 4096 -f gh-publish.key -C <GH_EMAIL>`
-- `travis encrypt-file gh-publish.key`
-- `rm gh-publish.key`
-- `git add gh-publish.key.enc`
-- `cat gh-publish.key.pub` and paste into GitHub Deploy Keys (ensure push is enabled)
+- create personal token
+    - https://github.com/settings/tokens/new
+    - enter description
+    - check `public_repo` scope
+- in Travis repo settings
+    - set `GH_PUBLISH_TOKEN` variable to contain the token string
