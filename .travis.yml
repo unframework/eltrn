@@ -20,7 +20,7 @@ after_success:
   - node_modules/.bin/browserify index.js > index-browserify.js &&
     mv index-browserify.js index.js &&
     git add index.js &&
-    git commit -m 'Auto-publishing via TravisCI' &&
+    git commit -m 'Auto-publishing via TravisCI [skip ci]' &&
     (
       eval `ssh-agent -s`;
       openssl aes-256-cbc -K "${!encKeyVar}" -iv "${!encIVVar}" -in gh-publish.key.enc -out gh-publish.key -d &&
