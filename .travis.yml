@@ -2,12 +2,10 @@ sudo: false
 branches:
   only:
     - master
-    - gh-publish # @todo remove
 
 language: node_js
 
 after_success:
-  - echo 'Publishing to GitHub Pages'
   - git config user.name 'TravisCI Auto-publisher'
   - git config user.email 'travis-auto-publish@example.com'
   - if [ "$TRAVIS_PULL_REQUEST" = false ]; then
